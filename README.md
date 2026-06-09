@@ -46,22 +46,57 @@ Claude Code (本地)          飞书智能体 Bot (平台)
 
 ## 快速开始
 
-```bash
-# 1. 初始化新项目
-claude pmo-init
+### 新用户安装
 
-# 2. 处理会议纪要
+```bash
+# 1. 克隆仓库
+git clone <仓库地址> ~/MyProjects/_smart-pmo
+
+# 2. 运行初始化脚本（创建配置目录 + 注册 Skills）
+cd ~/MyProjects/_smart-pmo && bash setup.sh
+```
+
+**前置依赖：**
+- `lark-cli` 已安装并完成认证（`npm install -g lark-cli && lark-cli auth`）
+- Claude Code 已安装
+- 已在飞书开放平台创建智能体 Bot 应用
+
+### 初始化第一个项目
+
+```bash
+# 交互式创建
+claude pmo-init
+# 按提示输入：项目名、PM、成员、群、Bot 凭据
+```
+
+### 日常使用
+
+```bash
+# 1. 处理会议纪要
 claude pmo-meeting-process --minutes <妙记链接>
 
-# 3. 从群聊提取待办
+# 2. 从群聊提取待办
 claude pmo-todo-from-chat
 
-# 4. 跟进待办
+# 3. 跟进待办
 claude pmo-todo-followup
 
-# 5. 切换项目
+# 4. 切换项目
 claude pmo-use <项目名>
 ```
+
+### 迁移到新机器
+
+```
+迁移步骤                  │ 移什么               │ 移什么
+──────────────────────────┼──────────────────────┼─────────────────────
+1. clone 仓库             │ Skill 定义 + 模板     │ Git 管理 ✅
+2. bash setup.sh          │ 创建 symlink + 配置目录│ 自动完成
+3. 手动复制 ~/.smart-pmo/registry/*.json │ 项目配置│ 敏感信息 ⚠️
+4. claude pmo-list        │ 验证一切正常           │
+```
+
+> ⚠️ `~/.smart-pmo/registry/` 包含 appSecret 和成员 open_id，**不要放入 Git**。迁移时手动复制或用加密方式传输。
 
 ## 文档索引
 
