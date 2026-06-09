@@ -1,0 +1,43 @@
+{
+  "config": {
+    "wide_screen_mode": true
+  },
+  "header": {
+    "title": {
+      "tag": "plain_text",
+      "content": "⚠️ 过期待办提醒"
+    },
+    "template": "red"
+  },
+  "elements": [
+    {
+      "tag": "div",
+      "text": {
+        "tag": "lark_md",
+        "content": "**{{project_name}}** 有以下待办已逾期："
+      }
+    },
+    {
+      "tag": "hr"
+    },
+    {
+      "tag": "div",
+      "text": {
+        "tag": "lark_md",
+        "content": "{{overdue_items}}"
+      }
+    },
+    {
+      "tag": "hr"
+    },
+    {
+      "tag": "note",
+      "elements": [
+        {
+          "tag": "plain_text",
+          "content": "Smart-PMO · 请尽快处理逾期事项"
+        }
+      ]
+    }
+  ]
+}

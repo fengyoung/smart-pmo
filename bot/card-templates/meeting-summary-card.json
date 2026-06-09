@@ -1,0 +1,57 @@
+{
+  "config": {
+    "wide_screen_mode": true
+  },
+  "header": {
+    "title": {
+      "tag": "plain_text",
+      "content": "📋 会议纪要已发布"
+    },
+    "template": "blue"
+  },
+  "elements": [
+    {
+      "tag": "div",
+      "text": {
+        "tag": "lark_md",
+        "content": "**会议：** {{meeting_topic}}\n**日期：** {{meeting_date}}\n**产出待办：** {{todo_count}} 项"
+      }
+    },
+    {
+      "tag": "hr"
+    },
+    {
+      "tag": "div",
+      "text": {
+        "tag": "lark_md",
+        "content": "**关键决策：**\n{{key_decisions}}"
+      }
+    },
+    {
+      "tag": "hr"
+    },
+    {
+      "tag": "action",
+      "actions": [
+        {
+          "tag": "button",
+          "text": {
+            "tag": "plain_text",
+            "content": "📎 查看完整纪要"
+          },
+          "type": "link",
+          "url": "{{doc_url}}"
+        }
+      ]
+    },
+    {
+      "tag": "note",
+      "elements": [
+        {
+          "tag": "plain_text",
+          "content": "Smart-PMO · 自动归档"
+        }
+      ]
+    }
+  ]
+}
