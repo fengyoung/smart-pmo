@@ -34,31 +34,54 @@ claude pmo-init
 | 问题 | 变量 | 说明 |
 |------|------|------|
 | 项目名称？ | `project_name` | 如"智能客服平台" |
-| 项目代号（可选）？ | `project_alias` | 如 "ICS" |
+| 项目代号（可选）？ | `project_alias` | 如 "ICS"；有 alias 时 registry 文件名用 alias，否则用全称 |
 | 项目经理姓名和飞书账号？ | `pm_name`, `pm_open_id` | 搜索确认 open_id |
 | 核心成员？ | `members` | 可添加多个，每人姓名+角色+open_id |
 | 项目群？ | `chat_id` | 搜索群名确认 |
-| Bot 的 appId？ | `bot_app_id` | 用户手动创建的智能体 |
+| Bot 的 appId？ | `bot_app_id` | 用户手动创建的智能体（详见 designs/bot-setup-guide.md）|
 | Bot 的 appSecret？ | `bot_app_secret` | 用户手动创建的智能体 |
 
-收集完毕后展示摘要，请求用户确认。
+**文件名规则**：`project_id = alias ?: project_name`，注册文件路径为 `~/.smart-pmo/registry/{project_id}.json`
 
 ### 第2步：创建知识空间
 
 通过 `lark-wiki` 创建独立知识空间：
 
 ```bash
-# 创建空间
+# 创建空间，解析返回的 space_id
 lark-cli wiki spaces create --data '{"name":"{project_name} 知识空间","description":"{project_name} 的项目文档归档空间"}' --yes
-
-# 创建 6 个子目录（用 +node-create，不支持 --format）
-lark-cli wiki +node-create --space-id {space_id} --title "01-会议纪要" --obj-type docx
-lark-cli wiki +node-create --space-id {space_id} --title "02-周报" --obj-type docx
-lark-cli wiki +node-create --space-id {space_id} --title "03-需求文档" --obj-type docx
-lark-cli wiki +node-create --space-id {space_id} --title "04-设计文档" --obj-type docx
-lark-cli wiki +node-create --space-id {space_id} --title "05-项目资料" --obj-type docx
-lark-cli wiki +node-create --space-id {space_id} --title "99-归档" --obj-type docx
+# → 记录返回值中的 space_id
 ```
+
+创建 6 个子目录节点，**逐条执行并记录每个节点返回的 node_token**：
+
+```bash
+# 每条命令执行后解析输出中的 node_token 字段
+lark-cli wiki +node-create --space-id {space_id} --title "01-会议纪要" --obj-type wiki
+# → 记录 node_token_1
+
+lark-cli wiki +node-create --space-id {space_id} --title "02-周报" --obj-type wiki
+# → 记录 node_token_2
+
+lark-cli wiki +node-create --space-id {space_id} --title "03-需求文档" --obj-type wiki
+# → 记录 node_token_3
+
+lark-cli wiki +node-create --space-id {space_id} --title "04-设计文档" --obj-type wiki
+# → 记录 node_token_4
+
+lark-cli wiki +node-create --space-id {space_id} --title "05-项目资料" --obj-type wiki
+# → 记录 node_token_5
+
+lark-cli wiki +node-create --space-id {space_id} --title "99-归档" --obj-type wiki
+# → 记录 node_token_6
+
+# 若 +node-create 不支持 obj-type wiki，改用原生 API：
+# lark-cli api POST "/open-apis/wiki/v2/spaces/{space_id}/nodes" \
+#   --data '{"obj_type":"wiki","title":"01-会议纪要"}'
+# → 从返回 JSON 的 data.node.node_token 字段读取
+```
+
+**注意**：每条命令的返回 JSON 中包含 `node_token` 字段，需逐一提取保存，用于第4步写入 `wikiNodeTokens`。如果命令返回为空，则通过 `lark-cli wiki +node-list --space-id {space_id}` 查询已创建节点列表获取 token。
 
 ### 第3步：创建多维表格 Base
 
@@ -145,7 +168,13 @@ lark-cli base +table-delete --base-token {token} --table-id {default_table_id} -
 
 ### 第4步：注册项目配置
 
-写入 `~/.smart-pmo/registry/{project_name}.json`，包含所有收集到的信息和飞书资源 ID。
+**① 将 appSecret 写入 macOS Keychain：**
+
+```bash
+security add-generic-password -s "smart-pmo-{project_alias}-bot" -a smart-pmo -w "{bot_app_secret}" -U
+```
+
+**② 写入 `~/.smart-pmo/registry/{project_name}.json`：**
 
 ```json
 {
@@ -161,6 +190,14 @@ lark-cli base +table-delete --base-token {token} --table-id {default_table_id} -
   },
   "larkResources": {
     "wikiSpaceId": "{space_id}",
+    "wikiNodeTokens": {
+      "01-会议纪要": "{node_token_1}",
+      "02-周报": "{node_token_2}",
+      "03-需求文档": "{node_token_3}",
+      "04-设计文档": "{node_token_4}",
+      "05-项目资料": "{node_token_5}",
+      "99-归档": "{node_token_6}"
+    },
     "baseAppToken": "{base_token}",
     "baseTableIds": {
       "todos": "{todo_table_id}",
@@ -170,15 +207,9 @@ lark-cli base +table-delete --base-token {token} --table-id {default_table_id} -
     "chatIds": ["{chat_id}"],
     "bot": {
       "appId": "{bot_app_id}",
-      "appSecret": "{bot_app_secret}",
+      "appSecret": "@keychain:smart-pmo-{project_alias}-bot",
       "name": "{project_name}-PMO-Bot"
     }
-  },
-  "archive": {
-    "directoryStructure": [
-      "01-会议纪要", "02-周报", "03-需求文档",
-      "04-设计文档", "05-项目资料", "99-归档"
-    ]
   },
   "chat": {
     "lastReadMessageId": "",
@@ -190,11 +221,25 @@ lark-cli base +table-delete --base-token {token} --table-id {default_table_id} -
 ### 第5步：设置当前项目
 
 ```bash
-# 写入 ~/.smart-pmo/current
-echo "{project_name}" > ~/.smart-pmo/current
+# 写入 ~/.smart-pmo/current（写入 project_id，即 alias 或全称）
+echo "{project_id}" > ~/.smart-pmo/current
 ```
 
-### 第6步：推送到项目群
+### 第6步：初始化群消息读取位置
+
+通过 `lark-im` 获取项目群当前最新消息 ID，写入配置：
+
+```
+lark-cli im +latest-message-id --chat-id {chat_id}
+→ 更新 registry JSON 中:
+  chat.lastReadMessageId = <最新消息ID>
+  chat.lastReadTime      = <当前时间 ISO 8601>
+```
+
+**目的**：让 `pmo-todo-from-chat` 首次执行时只处理此刻之后的新消息，避免翻取历史群聊。
+如果获取失败，`lastReadMessageId` 保持为空（首次执行时读最近 7 天）。
+
+### 第7步：推送到项目群
 
 通过 `lark-im` 发送卡片消息到项目群，通知初始化完成，包含：
 - 项目名称和成员
@@ -202,7 +247,7 @@ echo "{project_name}" > ~/.smart-pmo/current
 - 知识空间链接
 - 快速上手指引
 
-### 第7步：提示手动调整清单（API 限制）
+### 第8步：提示手动调整清单（API 限制）
 
 由于飞书 bitable API 的部分限制，以下 4 个字段需要在 Base UI 中手动调整：
 

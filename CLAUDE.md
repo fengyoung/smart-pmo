@@ -19,7 +19,7 @@ Smart-PMO 是一套项目管理的 Skill 集合，覆盖会议纪要提取、待
 ## 目录结构
 
 ```
-_smart-pmo/
+smart-pmo/
 ├── CLAUDE.md                           # 本文件 — 项目手册
 ├── REQUIREMENTS.md                     # 完整需求清单
 ├── README.md                           # 项目概述与快速开始

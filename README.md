@@ -50,10 +50,10 @@ Claude Code (本地)          飞书智能体 Bot (平台)
 
 ```bash
 # 1. 克隆仓库
-git clone <仓库地址> ~/MyProjects/_smart-pmo
+git clone <仓库地址> ~/MyProjects/smart-pmo
 
 # 2. 运行初始化脚本（创建配置目录 + 注册 Skills）
-cd ~/MyProjects/_smart-pmo && bash setup.sh
+cd ~/MyProjects/smart-pmo && bash setup.sh
 ```
 
 **前置依赖：**

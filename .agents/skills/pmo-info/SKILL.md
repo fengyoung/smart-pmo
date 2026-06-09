@@ -62,10 +62,16 @@ claude pmo-info
 📁 知识空间：飞书 Wiki #{space_id}
 💬 项目群：{chat_id}
 
-操作：
-  pmo-todo-followup    查看/跟进待办
-  pmo-milestone        查看里程碑
-  pmo-meeting-process  处理会议纪要
+── 快速操作 ──
+pmo-todo-followup              查看/跟进待办
+pmo-todo-followup --overdue    查看过期待办
+pmo-milestone                  查看里程碑
+pmo-milestone --check          检查到期情况
+pmo-meeting-process --minutes  处理飞书妙记
+pmo-meeting-process --text     手动输入会议记录
+pmo-todo-from-chat             从群消息提取待办
+pmo-weekly-report              生成本周周报
+pmo-use --archive              归档本项目
 ```
 
 ## 异常处理

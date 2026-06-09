@@ -66,20 +66,9 @@
     "chatIds": ["string — 项目群 ID，至少填1个"],
     "bot": {
       "appId": "string (必填) — 飞书自建应用 App ID",
-      "appSecret": "string (必填) — 飞书自建应用 App Secret",
+      "appSecret": "string (必填) — 凭据引用，支持两种格式（见下方安全说明）",
       "name": "string (可选) — Bot 名称"
     }
-  },
-
-  "archive": {
-    "directoryStructure": [
-      "01-会议纪要",
-      "02-周报",
-      "03-需求文档",
-      "04-设计文档",
-      "05-项目资料",
-      "99-归档"
-    ]
   },
 
   "chat": {
@@ -88,6 +77,27 @@
   }
 }
 ```
+
+### appSecret 安全存储
+
+`bot.appSecret` 字段**不存储明文密钥**，支持两种引用格式：
+
+**格式1：macOS Keychain（推荐）**
+```json
+"appSecret": "@keychain:<service-name>"
+```
+- `pmo-init` 时通过 `security add-generic-password -s <service-name> -a smart-pmo -w <secret>` 写入 Keychain
+- 读取时通过 `security find-generic-password -s <service-name> -w` 解析
+- 示例：`"appSecret": "@keychain:smart-pmo-ICS-bot"`
+
+**格式2：环境变量**
+```json
+"appSecret": "$env:SMART_PMO_ICS_SECRET"
+```
+- 从 shell 环境变量中读取，适合 CI 或多人共享场景
+- 示例：在 `.zshrc` 中 `export SMART_PMO_ICS_SECRET=xxx`
+
+所有 Skill 在读取 `appSecret` 字段时，必须先判断格式并解析，不能直接使用原始字符串。
 
 ### 示例文件
 
@@ -121,19 +131,9 @@
     "chatIds": ["oc_chat_001"],
     "bot": {
       "appId": "cli_abc123",
-      "appSecret": "xxxxxxxxxxxxxxxxxxxxxxxxxx",
+      "appSecret": "@keychain:smart-pmo-ICS-bot",
       "name": "ICS-PMO-Bot"
     }
-  },
-  "archive": {
-    "directoryStructure": [
-      "01-会议纪要",
-      "02-周报",
-      "03-需求文档",
-      "04-设计文档",
-      "05-项目资料",
-      "99-归档"
-    ]
   },
   "chat": {
     "lastReadMessageId": "",
@@ -144,60 +144,81 @@
 
 ---
 
-## 配置项：当前项目 `current`
+## 项目标识符规则（alias vs 全称）
 
-纯文本文件，内容仅为当前选中的项目名称，与 `registry/<name>.json` 的文件名（不含后缀）对应。
+**registry 文件名**：统一使用 `alias`（如有），否则使用项目全称。文件名即项目标识符（project_id）。
 
 ```
-smart-customer-platform
+~/.smart-pmo/registry/
+├── XRay.json          ← alias 为 XRay
+├── ICS.json           ← alias 为 ICS
+└── 数据平台V2.json    ← 无 alias，用全称
+```
+
+**`current` 和 `pinned` 文件**：存储 project_id（即文件名不含后缀），与文件名保持一致。
+
+**`pmo-use` 输入匹配规则**：
+- 支持输入 alias 或全称，任意一种都能找到对应项目
+- 匹配逻辑：先按文件名（alias）精确匹配，找不到再遍历所有 registry JSON 按 `project.name` 全称匹配
+
+**`pmo-init` 创建规则**：
+- 如果用户提供了 alias → 文件名用 alias
+- 没有提供 alias → 文件名用项目全称
+
+---
+
+## 配置项：当前项目 `current`
+
+纯文本文件，内容为 project_id（registry 文件名不含后缀），即 alias 或全称。
+
+```
+XRay
 ```
 
 ---
 
 ## 配置项：关注项目列表 `pinned`
 
-纯文本文件，每行一个项目名。为空时表示暂未关注任何项目。
+纯文本文件，每行一个 project_id（与 `current` 格式相同）。
 
 ```
-smart-customer-platform
-data-platform-v2
+XRay
+ICS
 ```
 
 ---
 
 ## Skill 读取配置的规则
 
-所有 Skill 在启动时通过以下逻辑获取当前项目配置：
-
 ```
 function getCurrentProjectConfig():
-    1. 检查环境变量 $SMART_PMO_CURRENT
-       - 如果存在且非空 → 使用该值作为当前项目名
-    2. 回退到文件 ~/.smart-pmo/current
-       - 读取文件内容作为项目名
-    3. 从 ~/.smart-pmo/registry/<项目名>.json 读取完整配置
-    4. 如果以上步骤失败 → 提示用户 "请先执行 pmo-use <项目名> 设置当前项目"
-```
-
-### 环境变量优先级
-
-环境变量 > 文件（用于多终端隔离场景）：
-
-```
-# 终端 1
-export SMART_PMO_CURRENT=project-a
-claude
-> pmo-todo-followup          # → 操作 project-a
-
-# 终端 2
-export SMART_PMO_CURRENT=project-b
-claude
-> pmo-todo-followup          # → 操作 project-b
+    1. 读取 ~/.smart-pmo/current 文件，获取项目名
+    2. 从 ~/.smart-pmo/registry/<项目名>.json 读取完整配置
+    3. 如果文件不存在或为空 → 提示用户 "请先执行 pmo-use <项目名> 设置当前项目"
 ```
 
 ### pmo-use 命令对配置的修改
 
-`pmo-use <项目名> [-g]`：
-- 默认行为：仅设置 `$SMART_PMO_CURRENT` 环境变量（当前会话有效）
-- `-g` 标志：同时写入 `~/.smart-pmo/current` 文件（全局持久化）
-- 使用前会校验 `<项目名>.json` 是否存在，不存在则提示
+`pmo-use <项目名>`：写入 `~/.smart-pmo/current` 文件（全局持久化，所有终端生效）
+
+`pmo-use <项目名> --archive`：将 registry JSON 中 `project.status` 改为 `archived`
+
+`pmo-use <项目名> --activate`：将 registry JSON 中 `project.status` 改为 `active`
+
+---
+
+## 当前操作者 openId 的获取规则
+
+所有需要"当前用户"身份的操作（如 `--mine`、`--add-member` 中的自己、里程碑负责人默认值等），通过以下方式获取当前登录用户的 openId：
+
+```
+function getCurrentUserOpenId():
+    1. 通过 lark-contact 调用"获取当前用户信息"接口
+       lark-cli contact +me
+    2. 返回当前飞书登录用户的 openId
+    3. 如调用失败 → 提示"无法获取当前用户信息，请检查飞书 CLI 登录状态"
+```
+
+**依赖声明**：所有使用 `--mine` 或涉及"当前用户"的 Skill，必须在 frontmatter `depends_on` 中声明 `lark-contact`。
+
+涉及的 Skill：`pmo-todo-followup`、`pmo-milestone`、`pmo-use`（--add-member 时搜索成员）

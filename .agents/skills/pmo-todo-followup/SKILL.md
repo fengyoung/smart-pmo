@@ -8,6 +8,7 @@ metadata:
   depends_on:
     - lark-base
     - lark-im
+    - lark-contact
 ---
 
 # pmo-todo-followup — 待办跟进
@@ -30,8 +31,14 @@ claude pmo-todo-followup --status 待处理
 # 跨所有关注项目查看
 claude pmo-todo-followup --all
 
-# 标记完成
+# 标记完成（单个）
 claude pmo-todo-followup --complete TODO-003
+
+# 批量标记完成（多个 ID）
+claude pmo-todo-followup --complete TODO-003 TODO-005 TODO-008
+
+# 批量完成我的全部待处理待办（需确认）
+claude pmo-todo-followup --complete --all-mine
 
 # 修改待办
 claude pmo-todo-followup --modify TODO-003 --assign @李四
@@ -48,6 +55,29 @@ claude pmo-todo-followup --modify TODO-003 --due 2026-06-20
 
 1. 从 Base「待办事项」表读取所有记录
 2. 按参数过滤（--mine / --overdue / --status）
+   - `--mine`：先通过 `lark-contact +me` 获取当前用户 openId，再筛选负责人字段
+   - `--all`：遍历 `~/.smart-pmo/pinned` 项目列表（若 pinned 为空则用所有 active 项目），并行查询每个项目的 Base，按项目分组展示
+
+**`--all` 模式的展示格式（按项目分组）：**
+
+```
+📋 全部项目待办 ({N} 个项目)
+══════════════════════════════════
+
+◆ {项目名} ({代号}) — 过期 {N} | 待处理 {N}
+┌──────┬─────────────────┬──────────┬──────────┬────────┐
+│ ID   │ 内容             │ 负责人   │ 截止日期  │ 优先级 │
+├──────┼─────────────────┼──────────┼──────────┼────────┤
+│ 003  │ 确定UI方案       │ 李四     │ 06-06 ‼️ │ P1     │
+└──────┴─────────────────┴──────────┴──────────┴────────┘
+
+◆ {项目名2} ({代号2}) — 过期 {N} | 待处理 {N}
+...
+```
+
+**`--all` 模式下使用 `--complete`**：
+- 需同时指定项目，格式：`pmo-todo-followup --complete {project_id}/TODO-003`
+- 或直接切换到该项目后执行：`pmo-use XRay && pmo-todo-followup --complete TODO-003`
 3. 按截止日期排序，分组展示：
 
 ```
@@ -73,17 +103,18 @@ claude pmo-todo-followup --modify TODO-003 --due 2026-06-20
 
 ### 标记完成 (--complete)
 
-1. 通过 `lark-base update_record` 更新：
+**单个或多个 ID：**
+1. 通过 `lark-base update_record` 逐条更新：
    - 状态 = "已完成"
    - 完成日期 = 当天
-2. 输出确认："✅ TODO-{ID} 已标记为完成"
-3. 可选推送群消息
+2. 输出确认："✅ TODO-{ID} 已标记为完成"（每条一行）
+
+**批量完成我的全部待处理（--complete --all-mine）：**
+1. 查询负责人=当前用户、状态=待处理 的所有待办
+2. 展示待完成列表，要求用户确认："以上 {N} 条全部标记为完成？[y/N]"
+3. 确认后批量更新，输出汇总结果
 
 ### 修改待办 (--modify)
 
 1. 通过 `lark-base update_record` 更新指定字段
 2. 输出确认
-
-## 设计文档
-
-完整规格见：`../../designs/skill-specs/pmo-todo-followup.md`

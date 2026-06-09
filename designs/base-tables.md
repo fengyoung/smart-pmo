@@ -35,7 +35,7 @@
 | 待办ID | 自动编号 `auto_serial` | — | 格式 `TODO-001` | 系统自动生成，不可修改 |
 | 待办内容 | 文本 `text` | ✅ | — | 具体的待办事项描述 |
 | 负责人 | 人员 `user` | ✅ | — | 单选，从项目成员中选择 |
-| 截止日期 | 日期 `date` | ✅ | — | 格式：YYYY-MM-DD |
+| 截止日期 | 日期 `date` | — | — | 格式：YYYY-MM-DD；AI 无法识别时留空，展示时高亮"截止日期待确认" |
 | 状态 | 单选 `select` | ✅ | `待处理` | 选项：`待处理` / `进行中` / `已完成` / `已取消` |
 | 优先级 | 单选 `select` | ✅ | `P2-一般` | 选项：`P0-紧急` / `P1-重要` / `P2-一般` / `P3-低优` |
 | 所属会议 | 关联 `lookup` | — | — | 关联到「会议记录索引」表的「产出待办」字段 |
@@ -158,8 +158,16 @@ lark-cli base +base-create --name "<项目名>-PMO-管理台" --time-zone "Asia/
 ```bash
 # 创建空间
 lark-cli wiki spaces create --data '{"name":"<项目名> 知识空间","description":"..."}' --yes
-# 创建子目录
-lark-cli wiki +node-create --space-id <space_id> --title "01-会议纪要" --obj-type docx
+# 创建子目录节点（obj-type 使用 wiki，创建目录容器节点，而非 docx 文档）
+lark-cli wiki +node-create --space-id <space_id> --title "01-会议纪要" --obj-type wiki
+lark-cli wiki +node-create --space-id <space_id> --title "02-周报" --obj-type wiki
+lark-cli wiki +node-create --space-id <space_id> --title "03-需求文档" --obj-type wiki
+lark-cli wiki +node-create --space-id <space_id> --title "04-设计文档" --obj-type wiki
+lark-cli wiki +node-create --space-id <space_id> --title "05-项目资料" --obj-type wiki
+lark-cli wiki +node-create --space-id <space_id> --title "99-归档" --obj-type wiki
+# 注意：如果 lark-cli 不支持 wiki 类型，改用原生 API：
+# lark-cli api POST "/open-apis/wiki/v2/spaces/<space_id>/nodes" \
+#   --data '{"obj_type":"wiki","title":"01-会议纪要"}'
 ```
 
 ### 创建表（+table-create）
