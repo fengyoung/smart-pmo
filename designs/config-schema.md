@@ -21,12 +21,13 @@
 
 ```json
 {
-  "$schema": "smart-pmo/project-config-v1",
+  "$schema": "https://github.com/fengyoung/smart-pmo/schemas/project-config-v1.json",
 
   "project": {
     "name": "string (必填) — 项目名称",
     "alias": "string (可选) — 项目代号 / 缩写",
     "createdDate": "string (必填) — 格式 YYYY-MM-DD，初始化日期",
+    "lastModified": "string (可选) — 格式 ISO 8601，最后修改时间",
     "status": "string (必填) — 可选值: active | archived"
   },
 
@@ -46,7 +47,17 @@
 
   "larkResources": {
     "wikiSpaceId": "string (必填) — 飞书知识空间 ID",
+    "wikiNodeTokens": {
+      "01-会议纪要": "string (必填) — 目录节点 token",
+      "02-周报": "string (必填) — 目录节点 token",
+      "03-需求文档": "string (必填) — 目录节点 token",
+      "04-设计文档": "string (必填) — 目录节点 token",
+      "05-项目资料": "string (必填) — 目录节点 token",
+      "99-归档": "string (必填) — 目录节点 token"
+    },
     "baseAppToken": "string (必填) — 多维表格 App Token",
+    "baseUrl": "string (可选) — 多维表格访问链接",
+    "wikiUrl": "string (可选) — 知识空间访问链接",
     "baseTableIds": {
       "todos": "string (必填) — 待办事项 表 ID",
       "milestones": "string (必填) — 里程碑 表 ID",

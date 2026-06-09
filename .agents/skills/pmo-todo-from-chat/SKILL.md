@@ -123,7 +123,7 @@ last_read_time = config["chat"]["lastReadTime"]     # 可能为空
 
 ## 设计文档
 
-完整规格见：`designs/skill-specs/pmo-todo-from-chat.md`
+完整规格见：`../../designs/skill-specs/pmo-todo-from-chat.md`
 
 ## 异常处理
 

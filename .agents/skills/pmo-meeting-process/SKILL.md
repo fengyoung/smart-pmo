@@ -159,7 +159,7 @@ config = get_current_project_config()
 
 ## 设计文档
 
-完整规格见：`designs/skill-specs/pmo-meeting-process.md`
+完整规格见：`../../designs/skill-specs/pmo-meeting-process.md`
 
 ## 异常处理
 

@@ -47,27 +47,47 @@ claude pmo-init
 
 通过 `lark-wiki` 创建独立知识空间：
 
-```
-空间名称：{project_name} 知识空间
-```
+```bash
+# 创建空间
+lark-cli wiki spaces create --data '{"name":"{project_name} 知识空间","description":"{project_name} 的项目文档归档空间"}' --yes
 
-创建后在空间中建立 6 个目录：
-- `01-会议纪要/`
-- `02-周报/`
-- `03-需求文档/`
-- `04-设计文档/`
-- `05-项目资料/`
-- `99-归档/`
+# 创建 6 个子目录（用 +node-create，不支持 --format）
+lark-cli wiki +node-create --space-id {space_id} --title "01-会议纪要" --obj-type docx
+lark-cli wiki +node-create --space-id {space_id} --title "02-周报" --obj-type docx
+lark-cli wiki +node-create --space-id {space_id} --title "03-需求文档" --obj-type docx
+lark-cli wiki +node-create --space-id {space_id} --title "04-设计文档" --obj-type docx
+lark-cli wiki +node-create --space-id {space_id} --title "05-项目资料" --obj-type docx
+lark-cli wiki +node-create --space-id {space_id} --title "99-归档" --obj-type docx
+```
 
 ### 第3步：创建多维表格 Base
 
 通过 `lark-base` 创建 Base：
 
-```
-Base 名称：{project_name}-PMO-管理台
+```bash
+# 创建 Base（自带一张默认"数据表"）
+lark-cli base +base-create --name "{project_name}-PMO-管理台" --time-zone "Asia/Shanghai"
 ```
 
-在 Base 中创建 3 张表：
+**在 Base 中创建 3 张表：**
+```bash
+lark-cli base +table-create --base-token {token} --name "待办事项"
+lark-cli base +table-create --base-token {token} --name "里程碑"
+lark-cli base +table-create --base-token {token} --name "会议记录索引"
+```
+
+**删除默认"数据表"：**（最后一张表不可删，先建新表再删默认表）
+```bash
+lark-cli base +table-delete --base-token {token} --table-id {default_table_id} --yes
+```
+
+**逐表添加字段：**
+- text/datetime/number → 用快捷方式 `+field-create --json`
+- select → 必须用原生 API（快捷方式不支持 `property` 嵌套）
+- link → 必须用原生 API（需指定 `property.table_id`）
+- user → 原生 API 创建（API 默认 `multiple=true`，需在 Base UI 手动改为单选）
+
+实际创建时的字段：
 
 **表1：待办事项**
 
@@ -181,6 +201,26 @@ echo "{project_name}" > ~/.smart-pmo/current
 - PMO 管理台 Base 链接
 - 知识空间链接
 - 快速上手指引
+
+### 第7步：提示手动调整清单（API 限制）
+
+由于飞书 bitable API 的部分限制，以下 4 个字段需要在 Base UI 中手动调整：
+
+```
+⚠️ 请在 Base UI 中手动调整以下字段：
+
+┌─────────────────────┬──────────────┬───────────────────┐
+│ 表       │ 字段          │ 调整操作             │
+├─────────────────────┼──────────────┼───────────────────┤
+│ 待办事项  │ 负责人        │ 取消"允许多选"        │
+│ 里程碑    │ 负责人        │ 取消"允许多选"        │
+│ 里程碑    │ 进度          │ 显示格式改为"进度条"    │
+│ 会议索引  │ 纪要文档链接   │ 字段类型改为"链接"     │
+│ 全部关联字段│ 关联待办/产出待办 │ 开启"允许多选"      │
+└─────────────────────┴──────────────┴───────────────────┘
+
+Base 链接：https://zhuanspirit.feishu.cn/base/{base_token}
+```
 
 ## 异常处理
 

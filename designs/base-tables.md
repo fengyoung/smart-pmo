@@ -143,47 +143,79 @@
 
 ## 飞书 Base API 创建参考
 
-pmo-init 调用飞书 API 创建 Base 时，对应的 API 参数：
+pmo-init 调用飞书 API 创建 Base 时，对应的 API 参数。
 
 ### 创建 Base
 
-```
-POST /open-apis/bitable/v1/apps
-{
-  "name": "<项目名>-PMO-管理台"
-}
+```bash
+# shortcut
+lark-cli base +base-create --name "<项目名>-PMO-管理台" --time-zone "Asia/Shanghai"
+# 新建 Base 自带一张默认表"数据表"，需删除
 ```
 
-### 创建表
+### 创建知识空间
 
+```bash
+# 创建空间
+lark-cli wiki spaces create --data '{"name":"<项目名> 知识空间","description":"..."}' --yes
+# 创建子目录
+lark-cli wiki +node-create --space-id <space_id> --title "01-会议纪要" --obj-type docx
 ```
-POST /open-apis/bitable/v1/apps/{app_token}/tables
-{
-  "name": "待办事项",
-  "fields": [
-    { "field_name": "待办内容", "type": 1, "property": {} },
-    { "field_name": "负责人", "type": 11, "property": {} },
-    { "field_name": "截止日期", "type": 5, "property": { "date_format": 1 } },
-    { "field_name": "状态", "type": 3, "property": { "options": [...] } },
-    ...
-  ]
-}
+
+### 创建表（+table-create）
+
+```bash
+lark-cli base +table-create --base-token <token> --name "待办事项"
+# 新建表自带 ID 字段(auto_number)，无需手动创建
+```
+
+### 创建字段
+
+**快捷方式（推荐用于 text/datetime/number）：**
+```bash
+lark-cli base +field-create --base-token <token> --table-id <id> --json '{"name":"待办内容","type":"text"}'
+lark-cli base +field-create --base-token <token> --table-id <id> --json '{"name":"截止日期","type":"datetime"}'
+```
+
+**原生 API（必须用于 select / link / user 字段）：**
+```bash
+# select 字段 — 快捷方式不支持 property 嵌套，需原生 API
+lark-cli api POST "/open-apis/bitable/v1/apps/<token>/tables/<id>/fields" \
+  --data '{"field_name":"状态","type":3,"property":{"options":[...]}}'
+
+# link 字段 — 需指定 table_id
+lark-cli api POST "/open-apis/bitable/v1/apps/<token>/tables/<id>/fields" \
+  --data '{"field_name":"所属会议","type":18,"property":{"table_id":"<target_table_id>"}}'
+
+# user 字段
+lark-cli api POST "/open-apis/bitable/v1/apps/<token>/tables/<id>/fields" \
+  --data '{"field_name":"负责人","type":11,"property":{}}'
 ```
 
 ### 字段类型对照
 
-| 类型 | type | 说明 |
-|------|------|------|
-| 文本 | 1 | 单行文本 |
-| 数字 | 2 | 数字 |
-| 单选 | 3 | 单选 |
-| 多选 | 4 | 多选 |
-| 日期 | 5 | 日期 |
-| 人员 | 11 | 人员（单选）|
-| 多选人员 | 22 | 人员（多选）|
-| 自动编号 | 13 | 自动编号 |
-| 关联 | 17 | 关联记录（lookup）|
-| 链接 | 15 | URL 链接 |
-| 进度 | 14 | 百分比进度条 |
+| 类型 | type | 快捷方式 string | 说明 |
+|------|------|----------------|------|
+| 文本 | 1 | `text` | 单行文本 |
+| 数字 | 2 | `number` | 数字 |
+| 单选 | 3 | — | 需原生 API（快捷方式不支持 property 嵌套）|
+| 多选 | 4 | — | 需原生 API |
+| 日期时间 | 5 | `datetime` | 快捷方式创建后 format=yyyy/MM/dd |
+| 人员 | 11 | `user` | **注意：API 默认 multiple=true（多选）**，单选需在 Base UI 手动设置 |
+| 自动编号 | 13 | — | +table-create 自动创建 ID 字段 |
+| 链接(URL) | 15 | — | **API 不支持创建 url 类型**，需在 Base UI 手动改为链接列 |
+| 关联记录 | 18 | — | 需原生 API 指定 table_id |
+| 多选人员 | 22 | — | 需原生 API |
 
-> 注：创建表时可通过 POST 接口一次性定义字段和选项。关联字段需要在两张表都创建完成后分别配置。
+### ⚠️ 已知 API 限制
+
+以下字段类型无法通过 API 精确创建，需 `pmo-init` 完成后在 Base UI 中手动调整：
+
+| 字段 | 期望 | API 实际创建 | 手动调整方式 |
+|------|------|-------------|-------------|
+| `负责人`（待办/里程碑） | 单选人员 | **多选人员** | Base UI → 字段设置 → 取消"允许多选" |
+| `纪要文档链接` | URL 链接 | **文本** | Base UI → 字段设置 → 改为链接列 |
+| `关联待办` / `产出待办` | 多值关联 | **单值关联** | Base UI → 字段设置 → 允许多选 |
+| `进度` | 进度条 | **数字** | Base UI → 字段设置 → 显示为进度条 |
+
+> **建议：** pmo-init 完成后，输出手动调整清单提醒用户在 Base UI 中修正这 4 类字段。

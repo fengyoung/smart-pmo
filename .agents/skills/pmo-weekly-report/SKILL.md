@@ -40,4 +40,4 @@ claude pmo-weekly-report --week YYYY-MM-DD
 
 ## 设计文档
 
-完整格式见：`designs/skill-specs/pmo-weekly-report.md` 和 `templates/weekly-report-template.md`
+完整格式见：`../../designs/skill-specs/pmo-weekly-report.md` 和 `../../templates/weekly-report-template.md`

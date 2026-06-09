@@ -1,7 +1,7 @@
 ---
 name: pmo-todo-followup
 version: 1.0.0
-description: "待办事项跟进：查看、筛选、标记完成、修改负责人/截止日期。支持 --mine/--overdue/--status/--complete/--modify 参数。"
+description: "待办事项跟进：查看、筛选、标记完成、修改负责人/截止日期。支持 --mine/--overdue/--status/--all/--complete/--modify 参数。"
 metadata:
   requires:
     bins: []
@@ -26,6 +26,9 @@ claude pmo-todo-followup --overdue
 
 # 按状态筛选
 claude pmo-todo-followup --status 待处理
+
+# 跨所有关注项目查看
+claude pmo-todo-followup --all
 
 # 标记完成
 claude pmo-todo-followup --complete TODO-003
@@ -83,4 +86,4 @@ claude pmo-todo-followup --modify TODO-003 --due 2026-06-20
 
 ## 设计文档
 
-完整规格见：`designs/skill-specs/pmo-todo-followup.md`
+完整规格见：`../../designs/skill-specs/pmo-todo-followup.md`
