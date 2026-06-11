@@ -41,14 +41,36 @@ claude pmo-use --list-members
    - 先按文件名（alias）精确匹配 `~/.smart-pmo/registry/<输入>.json`
    - 找不到 → 遍历所有 registry JSON，按 `project.name` 全称匹配
    - 仍找不到 → 提示：`项目 "<输入>" 未注册，请先运行 pmo-init`
-2. 找到配置后，写入 `~/.smart-pmo/current`（写入 project_id，即文件名不含后缀）
-3. 展示摘要：
+2. 找到配置后，执行配置完整性校验：
+
+```
+校验规则：
+  ✅ config.project.name 不为空
+  ✅ config.larkResources.baseAppToken 不为空
+  ✅ config.larkResources.baseTableIds.todos 不为空
+  ✅ config.larkResources.baseTableIds.milestones 不为空
+  ✅ config.larkResources.baseTableIds.meetingIndex 不为空
+  ✅ config.larkResources.wikiSpaceId 不为空
+  ✅ config.larkResources.chatIds[0] 不为空（如有）
+
+若任一必填字段缺失 → 输出警告并列出缺失字段，继续执行切换但不保证后续 Skill 正常工作
+```
+
+3. 尝试 Base 连通性检查：
+   - 通过 `lark-base` 查询待办表（limit=1），验证 token 有效
+   - 成功 → 记录待办总数用于摘要
+   - 失败 → 摘要中标注 `⚠️ Base 连接失败，请检查权限或 token 有效性`
+
+4. 写入 `~/.smart-pmo/current`（写入 project_id，即文件名不含后缀）
+5. 展示摘要：
 
 ```
 ✅ 已切换至: {项目名} ({代号})
 
 项目经理: {姓名}
-状态: active
+状态: active | ⚠️ 配置不完整: {缺失字段}
+Base 状态: 正常 ({N} 条待办) | ⚠️ 连接失败
+配置版本: v{schemaVersion}（当前最新 v1.1）| ⚠️ 版本过旧，建议运行迁移
 
 使用 pmo-list 查看所有项目
 ```

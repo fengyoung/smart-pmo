@@ -401,9 +401,10 @@ Smart-PMO 是一套基于 **Claude Code Skill 系统 + 飞书 CLI** 的项目管
 
 ## 十、待办事项（当前）
 
-以下是在已经完成两轮审阅优化的基础上，仍待解决的问题：
+以下是在已经完成全面审阅优化的基础上，仍待解决的问题：
 
-1. 已有 `pmo-search` skill（P2），尚未集成到主流程
-2. `claude.md` 和各 Skill 中引用的 Bot 相关配置和逻辑需清理
-3. `setup.sh` 需增强：自动装 lark-cli、引导认证、复制项目配置示例
-4. 文档中的 Bot 配置指南（`bot-setup-guide.md`）和 `bot/` 目录保留作为参考存档，不影响主功能
+1. 已有 `pmo-search` skill（P2），已集成到 `pmo-todo-followup`、`pmo-dashboard` 等 Skill 的操作提示中
+2. Bot 相关内容已彻底清理（`bot/` 目录已删除，`bot-setup-guide.md` 保留作为历史存档）
+3. `setup.sh` 已增强：Node.js 前置检查、lark-cli 安装引导
+4. 配置版本管理已上线（schemaVersion 1.1），支持自动迁移
+5. 测试 checklist 已编写（`tests/skill-checklist.md`），需在实际使用中持续更新

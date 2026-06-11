@@ -18,6 +18,9 @@ metadata:
 ```bash
 # 交互式初始化新项目
 claude pmo-init
+
+# 从已有项目克隆模板（复用 wiki 结构 + Base schema）
+claude pmo-init --from <项目名>
 ```
 
 ## 前置条件
@@ -193,6 +196,7 @@ lark-cli base +table-delete --base-token {token} --table-id {default_table_id} -
 
 ```json
 {
+  "schemaVersion": "1.1",
   "project": {
     "name": "{project_name}",
     "alias": "{project_alias}",
@@ -222,8 +226,12 @@ lark-cli base +table-delete --base-token {token} --table-id {default_table_id} -
     "chatIds": ["{chat_id}"]
   },
   "chat": {
-    "lastReadMessageId": "",
-    "lastReadTime": ""
+    "readPositions": {
+      "{chat_id}": {
+        "lastReadMessageId": "",
+        "lastReadTime": ""
+      }
+    }
   }
 }
 ```
@@ -242,8 +250,8 @@ echo "{project_id}" > ~/.smart-pmo/current
 ```
 lark-cli im +latest-message-id --chat-id {chat_id}
 → 更新 registry JSON 中:
-  chat.lastReadMessageId = <最新消息ID>
-  chat.lastReadTime      = <当前时间 ISO 8601>
+  chat.readPositions["{chat_id}"].lastReadMessageId = <最新消息ID>
+  chat.readPositions["{chat_id}"].lastReadTime      = <当前时间 ISO 8601>
 ```
 
 **目的**：让 `pmo-todo-from-chat` 首次执行时只处理此刻之后的新消息，避免翻取历史群聊。
@@ -269,6 +277,17 @@ lark-cli im +latest-message-id --chat-id {chat_id}
 Base 链接：https://zhuanspirit.feishu.cn/base/{base_token}
 ```
 
+### 模板克隆模式（--from）
+
+当使用 `--from <项目名>` 时：
+
+1. 读取源项目的 registry 配置
+2. **第2步（知识空间）**：创建新知识空间，使用源项目的 wikiNodeTokens keys 作为目录模板（而非硬编码的 6 个目录）
+3. **第3步（Base）**：创建新 Base，沿用源项目的表名和字段定义（通过查询源 Base 的字段列表获取 schema），不复制数据
+4. 其他步骤与正常模式相同（收集信息、注册配置、设置上下文）
+
+**目的**：同一部门的多个子项目共享相同管理结构时，避免每次重复配置。
+
 ## 异常处理
 
 | 场景 | 处理方式 |
@@ -278,3 +297,4 @@ Base 链接：https://zhuanspirit.feishu.cn/base/{base_token}
 | 知识空间创建失败 | 提示手动创建，提供指引 |
 | Base 创建失败 | 提示手动创建 |
 | 用户中途退出 | 已创建资源保留在 registry 中，重跑时自动恢复 |
+| --from 源项目不存在 | 提示"源项目未注册"，退回到交互式模式 |

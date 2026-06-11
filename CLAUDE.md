@@ -1,6 +1,15 @@
 # Smart-PMO 项目手册
 
 > 基于 Claude Code + 飞书 CLI 的项目管理工具集
+> 项目版本：见根目录 `VERSION` 文件（当前 v1.1.0）
+
+---
+
+## 版本管理约定
+
+- **`VERSION`** 文件为项目唯一版本源，所有版本号需与此文件保持一致
+- `使用手册.md` 的版本标注、`designs/config-schema.md` 的 `schemaVersion` 跟随 VERSION 同步更新
+- 各 Skill 独立维护自身版本号（在各自 SKILL.md frontmatter 中），但依赖的公共约定（如配置结构）应与 VERSION 兼容
 
 ---
 
@@ -24,27 +33,14 @@ smart-pmo/
 ├── REQUIREMENTS.md                     # 完整需求清单
 ├── README.md                           # 项目概述与快速开始
 
-├── designs/                            # 详细设计文档
+├── designs/                            # 架构级设计文档
 │   ├── base-tables.md                  # 多维表格 Base 3 张表的字段设计
 │   ├── config-schema.md                # 配置项 schema 定义
-│   ├── bot-setup-guide.md              # 飞书智能体 Bot 配置指南
-│   └── skill-specs/                    # 各 Skill 详细规格
-│       ├── pmo-init.md
-│       ├── pmo-meeting-process.md
-│       ├── pmo-todo-from-chat.md
-│       ├── pmo-todo-followup.md
-│       ├── pmo-archive.md
-│       ├── pmo-milestone.md
-│       ├── pmo-weekly-report.md
-│       └── pmo-use-list-dashboard.md
+│   └── bot-setup-guide.md              # 飞书智能体 Bot 配置指南（已归档）
 
 ├── templates/                          # 文档模板
 │   ├── meeting-notes-template.md       # 会议纪要文档模板
 │   └── weekly-report-template.md       # 周报文档模板
-
-└── bot/                                # 飞书智能体 Bot 配置（已归档参考）
-    ├── card-templates/                  # 推送卡片模板
-    └── scheduled-tasks.md               # 定时任务配置说明
 ```
 
 ---
@@ -64,7 +60,7 @@ smart-pmo/
 
 | 依赖 | 角色 | 说明 |
 |------|------|------|
-| 飞书 CLI | 底层能力 | 通过 `lark-*` skill 访问飞书各 API |
+| 飞书 CLI | 底层能力 | 通过 `lark-*` skill 访问飞书各 API；所有操作通过 CLI 完成 |
 | `lark-base` | 操作多维表格 | 读/写待办、里程碑、会议索引 3 张表 |
 | `lark-wiki` | 操作知识库 | 创建知识空间、上传文档 |
 | `lark-doc` | 创建文档 | 生成会议纪要、周报等飞书文档 |
@@ -123,6 +119,24 @@ smart-pmo/
 4. **配置驱动** — 所有项目参数字段通过配置读取，不硬编码
 5. **信息反馈** — 执行完成后在终端输出结果
 
+### 公共：配置版本管理（所有 Skill 统一遵循）
+
+所有 registry JSON 文件包含 `schemaVersion` 字段，当前最新版本为 `1.1`。
+
+**版本兼容检查规则：**
+```
+1. 读取 registry JSON 后，检查 schemaVersion 字段
+2. 若 schemaVersion 不存在 → 视为 1.0，按迁移规则升级
+3. 若 schemaVersion < 当前版本 → 自动执行增量迁移（见下方迁移表）
+4. 若 schemaVersion > 当前版本 → 提示"配置版本过新，请升级 Smart-PMO"，中断执行
+```
+
+**版本迁移表：**
+
+| 版本 | 变更内容 | 迁移规则 |
+|------|---------|---------|
+| 1.0 → 1.1 | `chat.lastReadMessageId` 改为 `chat.readPositions["<chat_id>"]` map | 将原单值迁移为 `{ "<chatIds[0]>": { "lastReadMessageId": "<原值>", "lastReadTime": "<原值>" } }` |
+
 ### 公共：读取当前项目配置（所有 Skill 统一遵循）
 
 所有 `pmo-*` Skill 在需要项目上下文时，**必须按以下顺序**确定当前项目：
@@ -132,11 +146,14 @@ smart-pmo/
 2. 若无环境变量，读取文件 ~/.smart-pmo/current（内容为 project_id）
 3. 用 project_id 加载 ~/.smart-pmo/registry/{project_id}.json
 4. 文件不存在或为空 → 提示"请先执行 pmo-use <项目名>"，中断执行
+5. 检查 schemaVersion，执行必要的版本迁移（见上方版本管理）
+6. 执行配置完整性校验（见下方配置校验）
 ```
 
 **配置对象结构（所有 Skill 通过以下路径访问字段）：**
 
 ```
+config.schemaVersion               配置版本号（当前 1.1）
 config.project.name              项目全称
 config.project.alias             项目代号（可选）
 config.project.status            active / archived
@@ -149,9 +166,56 @@ config.larkResources.baseAppToken        Base token
 config.larkResources.baseTableIds.todos          待办表 ID
 config.larkResources.baseTableIds.milestones     里程碑表 ID
 config.larkResources.baseTableIds.meetingIndex   会议索引表 ID
-config.larkResources.chatIds[0]          项目群 chat_id
-config.chat.lastReadMessageId            群消息读取位置
-config.chat.lastReadTime                 上次读取时间
+config.larkResources.chatIds[]          项目群 chat_id 列表
+config.chat.readPositions["<chat_id>"].lastReadMessageId   各群消息读取位置
+config.chat.readPositions["<chat_id>"].lastReadTime        各群上次读取时间
+```
+
+### 公共：配置完整性校验（所有 Skill 统一遵循）
+
+加载配置后，执行以下基本校验：
+
+```
+1. 必填字段检查：
+   - config.project.name 不为空
+   - config.larkResources.baseAppToken 不为空
+   - config.larkResources.baseTableIds.todos/milestones/meetingIndex 不为空
+   - config.larkResources.wikiSpaceId 不为空
+2. 若任一必填字段缺失 → 提示"配置不完整，缺少: {字段列表}。建议重新运行 pmo-init 修复"
+3. Base 连通性检查（可选，pmo-use 和 pmo-info 执行）：
+   - 通过 lark-base 查询待办表（limit=1）验证 Base token 有效
+   - 失败时提示"⚠️ Base 连接失败，请检查 Base 权限和 token 有效性"
+4. 校验不通过不阻塞操作，但在终端明确展示警告
+```
+
+### 公共：错误重试策略（所有 Skill 统一遵循）
+
+所有飞书 API 写操作（Base 写入/更新、Wiki 创建、文档创建）遵循以下重试策略：
+
+```
+1. 首次失败 → 等待 1s 后重试
+2. 再次失败 → 等待 3s 后重试
+3. 第三次失败 → 等待 5s 后重试
+4. 三次均失败 → 记录错误详情，提示用户手动处理
+5. 可重试错误类型：网络超时、API 限流(429)、5xx 服务端错误
+6. 不可重试错误类型：权限不足(403)、资源不存在(404)、参数错误(400)
+```
+
+### 公共：知识库标准目录（所有 Skill 统一遵循）
+
+知识库的 6 个标准目录定义在项目配置 `config.larkResources.wikiNodeTokens` 的 keys 中，所有 Skill **从配置动态读取**，不硬编码目录名：
+
+```
+标准目录（按序号排列）：
+  01-会议纪要  ← pmo-meeting-process 自动归档会议纪要
+  02-周报      ← pmo-weekly-report 生成归档
+  03-需求文档  ← pmo-archive 可归档需求文档
+  04-设计文档  ← pmo-archive 可归档设计文档
+  05-项目资料  ← pmo-archive 可归档项目资料
+  99-归档      ← pmo-archive 默认归档目录
+```
+
+任何需要展示目录列表的 Skill，从 `Object.keys(config.larkResources.wikiNodeTokens)` 获取并排序。
 ```
 
 ### 公共：成员名称解析（所有 Skill 统一遵循）

@@ -1,7 +1,7 @@
 ---
 name: pmo-search
-version: 1.0.0
-description: "跨表跨项目搜索。支持在待办事项、里程碑、会议记录三张表中按关键词或语义检索，返回匹配条目并附来源链接。"
+version: 1.1.0
+description: "跨表跨项目搜索。支持在待办事项、里程碑、会议记录三张表中按关键词检索，返回匹配条目并附来源链接。已集成到 pmo-todo-followup、pmo-dashboard、pmo-info 的操作提示中。"
 metadata:
   requires:
     bins: []

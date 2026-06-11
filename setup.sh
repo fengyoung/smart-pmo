@@ -13,6 +13,40 @@ echo "│  Smart-PMO 环境初始化               │"
 echo "└─────────────────────────────────────┘"
 echo ""
 
+# 0. 检查 Node.js 和 npm
+echo "▶ 检查 Node.js 环境..."
+if ! command -v node &> /dev/null; then
+    echo "  ❌ Node.js 未安装"
+    echo ""
+    echo "  lark-cli 依赖 Node.js 运行，请先安装 Node.js (>=16)："
+    echo "    macOS:  brew install node"
+    echo "    Linux:  curl -fsSL https://deb.nodesource.com/setup_lts.x | sudo -E bash -"
+    echo "            sudo apt-get install -y nodejs"
+    echo "    官网:   https://nodejs.org/ (下载 LTS 版本)"
+    echo ""
+    exit 1
+fi
+
+if ! command -v npm &> /dev/null; then
+    echo "  ❌ npm 未安装（通常随 Node.js 一起安装）"
+    echo "  请重新安装 Node.js: https://nodejs.org/"
+    exit 1
+fi
+
+NODE_VERSION=$(node -v | cut -d'v' -f2 | cut -d'.' -f1)
+echo "  ✅ Node.js $(node -v) / npm $(npm -v)"
+
+if [ "$NODE_VERSION" -lt 16 ]; then
+    echo "  ⚠️  Node.js 版本过低（当前 $(node -v)），建议 >=16"
+    echo "  是否继续？(y/n)"
+    read -r continue_choice
+    if [ "$continue_choice" != "y" ] && [ "$continue_choice" != "Y" ]; then
+        echo "  请升级 Node.js 后重新运行"
+        exit 1
+    fi
+fi
+echo ""
+
 # 1. 检查/安装 lark-cli (@larksuite/cli)
 echo "▶ 检查 lark-cli..."
 if ! command -v lark-cli &> /dev/null; then

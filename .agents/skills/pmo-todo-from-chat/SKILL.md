@@ -30,9 +30,13 @@ claude pmo-todo-from-chat
 
 ```python
 config = get_current_project_config()
+# 优先使用 chatIds[0] 作为主群聊（后续多群聊支持时遍历所有 chat_id）
 chat_id = config["larkResources"]["chatIds"][0]
-last_msg_id = config["chat"]["lastReadMessageId"]  # 可能为空
-last_read_time = config["chat"]["lastReadTime"]     # 可能为空
+read_positions = config["chat"]["readPositions"]  # { "<chat_id>": { lastReadMessageId, lastReadTime } }
+# 兼容旧版配置（schemaVersion < 1.1）：若 readPositions 不存在，回退读取 chat.lastReadMessageId
+position = read_positions.get(chat_id, {}) if read_positions else {"lastReadMessageId": config.get("chat", {}).get("lastReadMessageId", ""), "lastReadTime": config.get("chat", {}).get("lastReadTime", "")}
+last_msg_id = position.get("lastReadMessageId", "")
+last_read_time = position.get("lastReadTime", "")
 ```
 
 ### 第2步：读取群聊消息
@@ -65,6 +69,21 @@ last_read_time = config["chat"]["lastReadTime"]     # 可能为空
 | 待办内容 | 任务描述语句 |
 | 负责人 | @提及 或 姓名识别 |
 | 截止时间 | 如"这周五""下周一""尽快" |
+| 优先级 | 从消息语气和关键词推断（见下方优先级推断规则） |
+
+**优先级推断规则（从群聊消息语义推断，默认 P2-一般）：**
+
+| 关键词/模式 | 推断优先级 | 说明 |
+|------------|-----------|------|
+| "紧急"、"P0"、"今天就要"、"马上"、"立刻" | P0-紧急 | 强紧急信号 |
+| "尽快"、"ASAP"、"这周"、"重要"、"P1"、"老板说了" | P1-重要 | 明确的时间压力/重要性 |
+| "不急"、"有空再做"、"低优"、"P3" | P3-低优 | 明确的低优先级信号 |
+| 无特殊信号 | P2-一般 | 默认值 |
+
+示例：
+- "这个需求今天就要上线，李四你处理一下" → P0-紧急
+- "接口文档尽快更新一下" → P1-重要
+- "等有空的时候看看这个" → P3-低优
 
 **截止时间动态计算（基于 currentDate）：**
 - "尽快" / "ASAP" → currentDate + 3天
@@ -140,9 +159,11 @@ last_read_time = config["chat"]["lastReadTime"]     # 可能为空
    - 来源 = "群聊"
    - 来源消息ID = 原始消息ID
    - 状态 = "待处理"
-   - 优先级 = "P2-一般"
+   - 优先级 = 根据消息语义推断（默认 P2-一般，见上方优先级推断规则）
 
-2. **写入成功后**，更新配置中的 `lastReadMessageId`（取本批消息中最后一条的 ID）和 `lastReadTime`
+2. **写入成功后**，更新配置中的 `readPositions[chat_id]`：
+   - `lastReadMessageId` = 本批消息中最后一条的 ID
+   - `lastReadTime` = 当前时间 ISO 8601
    - 写入失败时不更新，确保下次执行时能重试这批消息
 
 ## 异常处理

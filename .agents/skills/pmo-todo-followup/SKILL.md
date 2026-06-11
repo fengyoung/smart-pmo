@@ -49,6 +49,8 @@ claude pmo-todo-followup --modify TODO-003 --due 2026-06-20
 
 已通过 `pmo-use` 设置当前项目。
 
+**所有 Base 写操作遵循公共错误重试策略（见 CLAUDE.md）：3 次指数退避重试（1s/3s/5s）。**
+
 ## 执行流程
 
 ### 查看待办
@@ -84,6 +86,7 @@ claude pmo-todo-followup --modify TODO-003 --due 2026-06-20
   pmo-todo-followup --complete 1        标记第1条完成
   pmo-todo-followup --complete 1 2 3    批量标记完成
   pmo-todo-followup --modify 3 --due 2026-06-20
+  pmo-search <关键词>                   搜索待办/里程碑/会议
 ```
 
 **`--all` 模式的展示格式（按项目分组，序号跨项目独立）：**

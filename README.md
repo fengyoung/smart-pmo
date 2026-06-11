@@ -1,6 +1,7 @@
 # Smart-PMO
 
 > 基于 Claude Code + 飞书 CLI 的项目管理工具集
+> 版本：见 [VERSION](./VERSION) 文件
 
 ---
 
