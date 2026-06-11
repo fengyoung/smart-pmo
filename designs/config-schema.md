@@ -22,7 +22,7 @@
 ```json
 {
   "$schema": "https://github.com/fengyoung/smart-pmo/schemas/project-config-v1.json",
-  "schemaVersion": "1.1",
+  "schemaVersion": "1.2",
 
   "project": {
     "name": "string (必填) — 项目名称",
@@ -78,7 +78,7 @@
 
 ```json
 {
-  "schemaVersion": "1.1",
+  "schemaVersion": "1.2",
   "project": {
     "name": "智能客服平台",
     "alias": "ICS",
