@@ -193,7 +193,7 @@ claude pmo-meeting-process --minutes <链接> --topic "Sprint评审" --date 2026
 | 关键决策 | AI 提取内容 |
 | 产出待办 | 关联上一步写入的待办记录 |
 
-### 第6步：推送到项目群
+### 第6步：输出结果
 
 通过 `lark-im` 发送卡片消息到配置的 `chatId`：
 

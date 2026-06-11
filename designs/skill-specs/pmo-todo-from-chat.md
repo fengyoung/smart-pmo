@@ -46,8 +46,7 @@ last_read_time = config["chat"]["lastReadTime"]     # 可能为空
 
 **消息过滤规则：**
 - 排除系统消息（type=system）
-- 排除 Bot 自己发出的消息
-- 排除 @Bot 的指令类消息（如 /todo, /overdue 等）
+- 排除系统消息
 - 排除纯表情/图片消息
 
 保留每条消息的 `message_id` 用于排重。
@@ -137,11 +136,7 @@ last_read_time = config["chat"]["lastReadTime"]     # 可能为空
 
 ### 第6步：推送反馈
 
-通过 `lark-im` 推送群消息：
-
-```
-已从群消息提取 {N} 条待办并录入 Base
-```
+在终端输出提取结果。
 
 ---
 

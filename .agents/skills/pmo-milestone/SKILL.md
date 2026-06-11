@@ -19,11 +19,8 @@ metadata:
 # 查看所有里程碑
 claude pmo-milestone
 
-# 检查到期情况（7天内到期 + 已过期），仅终端输出
+# 检查到期情况（7天内到期 + 已过期）
 claude pmo-milestone --check
-
-# 检查并推送到项目群
-claude pmo-milestone --check --notify
 
 # 新增里程碑
 claude pmo-milestone --add "里程碑名称" --due YYYY-MM-DD --owner @姓名
@@ -48,7 +45,6 @@ claude pmo-milestone --complete MILE-001
 
 1. 读取所有状态≠已完成/已取消的里程碑
 2. 筛选即将到期（7天内）和已过期，在终端输出
-3. 仅在指定 `--notify` 时才推送到项目群
 
 ### 新增 --add
 

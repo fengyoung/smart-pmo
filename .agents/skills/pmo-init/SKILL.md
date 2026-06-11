@@ -1,7 +1,7 @@
 ---
 name: pmo-init
-version: 1.0.0
-description: "交互式初始化新项目：创建飞书知识空间、多维表格 Base（待办/里程碑/会议索引 3 张表）、注册项目配置。按提示收集项目信息后自动完成全部基础设施搭建。"
+version: 1.1.0
+description: "交互式初始化新项目：创建飞书知识空间、多维表格 Base（待办/里程碑/会议索引 3 张表）、注册项目配置。按提示收集项目信息后自动完成全部基础设施搭建。支持断点恢复：每步执行前检查资源是否已存在，重跑安全。"
 metadata:
   requires:
     bins: []
@@ -22,8 +22,7 @@ claude pmo-init
 
 ## 前置条件
 
-1. 用户已手动在飞书开放平台创建智能体 Bot 应用，获取到 `appId` 和 `appSecret`
-2. 用户已确认要初始化的项目群聊
+1. 用户已确认要初始化的项目群聊
 
 ## 执行流程
 
@@ -38,17 +37,36 @@ claude pmo-init
 | 项目经理姓名和飞书账号？ | `pm_name`, `pm_open_id` | 搜索确认 open_id |
 | 核心成员？ | `members` | 可添加多个，每人姓名+角色+open_id |
 | 项目群？ | `chat_id` | 搜索群名确认 |
-| Bot 的 appId？ | `bot_app_id` | 用户手动创建的智能体（详见 designs/bot-setup-guide.md）|
-| Bot 的 appSecret？ | `bot_app_secret` | 用户手动创建的智能体 |
 
 **文件名规则**：`project_id = alias ?: project_name`，注册文件路径为 `~/.smart-pmo/registry/{project_id}.json`
+
+### 幂等恢复机制（断点重跑）
+
+每步正式执行前，先从 registry JSON（如已存在）中读取已完成的资源 ID：
+- `larkResources.wikiSpaceId` 存在 → 跳过知识空间创建，直接使用
+- `larkResources.wikiNodeTokens` 中某个目录 token 存在 → 跳过该目录节点创建
+- `larkResources.baseAppToken` 存在 → 跳过 Base 创建，直接使用
+- `larkResources.baseTableIds.todos/milestones/meetingIndex` 存在 → 跳过对应表创建
+
+检查逻辑：
+
+```
+registry_path = ~/.smart-pmo/registry/{project_id}.json
+if 文件存在:
+    existing = 读取 JSON
+    # 用 existing 中的 ID 跳过已完成步骤
+else:
+    existing = {}  # 全新初始化
+```
+
+遇到已有资源时，输出：`[跳过] {资源名} 已存在（{resource_id}），继续下一步`
 
 ### 第2步：创建知识空间
 
 通过 `lark-wiki` 创建独立知识空间：
 
 ```bash
-# 创建空间，解析返回的 space_id
+# 幂等检查：如果 existing.larkResources.wikiSpaceId 存在，跳过此步
 lark-cli wiki spaces create --data '{"name":"{project_name} 知识空间","description":"{project_name} 的项目文档归档空间"}' --yes
 # → 记录返回值中的 space_id
 ```
@@ -56,7 +74,7 @@ lark-cli wiki spaces create --data '{"name":"{project_name} 知识空间","descr
 创建 6 个子目录节点，**逐条执行并记录每个节点返回的 node_token**：
 
 ```bash
-# 每条命令执行后解析输出中的 node_token 字段
+# 幂等检查：对每个目录，如果 existing.larkResources.wikiNodeTokens[目录名] 存在，跳过该条
 lark-cli wiki +node-create --space-id {space_id} --title "01-会议纪要" --obj-type wiki
 # → 记录 node_token_1
 
@@ -83,17 +101,20 @@ lark-cli wiki +node-create --space-id {space_id} --title "99-归档" --obj-type 
 
 **注意**：每条命令的返回 JSON 中包含 `node_token` 字段，需逐一提取保存，用于第4步写入 `wikiNodeTokens`。如果命令返回为空，则通过 `lark-cli wiki +node-list --space-id {space_id}` 查询已创建节点列表获取 token。
 
+**断点恢复时**：已有 token 的目录跳过创建，仍通过 node-list 补充缺失的 token。
+
 ### 第3步：创建多维表格 Base
 
 通过 `lark-base` 创建 Base：
 
 ```bash
-# 创建 Base（自带一张默认"数据表"）
+# 幂等检查：如果 existing.larkResources.baseAppToken 存在，跳过此步
 lark-cli base +base-create --name "{project_name}-PMO-管理台" --time-zone "Asia/Shanghai"
 ```
 
 **在 Base 中创建 3 张表：**
 ```bash
+# 幂等检查：如果 existing.larkResources.baseTableIds.todos 存在，跳过对应表创建
 lark-cli base +table-create --base-token {token} --name "待办事项"
 lark-cli base +table-create --base-token {token} --name "里程碑"
 lark-cli base +table-create --base-token {token} --name "会议记录索引"
@@ -168,13 +189,7 @@ lark-cli base +table-delete --base-token {token} --table-id {default_table_id} -
 
 ### 第4步：注册项目配置
 
-**① 将 appSecret 写入 macOS Keychain：**
-
-```bash
-security add-generic-password -s "smart-pmo-{project_alias}-bot" -a smart-pmo -w "{bot_app_secret}" -U
-```
-
-**② 写入 `~/.smart-pmo/registry/{project_name}.json`：**
+**写入 `~/.smart-pmo/registry/{project_name}.json`：**
 
 ```json
 {
@@ -204,12 +219,7 @@ security add-generic-password -s "smart-pmo-{project_alias}-bot" -a smart-pmo -w
       "milestones": "{milestone_table_id}",
       "meetingIndex": "{meeting_table_id}"
     },
-    "chatIds": ["{chat_id}"],
-    "bot": {
-      "appId": "{bot_app_id}",
-      "appSecret": "@keychain:smart-pmo-{project_alias}-bot",
-      "name": "{project_name}-PMO-Bot"
-    }
+    "chatIds": ["{chat_id}"]
   },
   "chat": {
     "lastReadMessageId": "",
@@ -239,17 +249,9 @@ lark-cli im +latest-message-id --chat-id {chat_id}
 **目的**：让 `pmo-todo-from-chat` 首次执行时只处理此刻之后的新消息，避免翻取历史群聊。
 如果获取失败，`lastReadMessageId` 保持为空（首次执行时读最近 7 天）。
 
-### 第7步：推送到项目群
+### 第7步：提示手动调整清单（API 限制）
 
-通过 `lark-im` 发送卡片消息到项目群，通知初始化完成，包含：
-- 项目名称和成员
-- PMO 管理台 Base 链接
-- 知识空间链接
-- 快速上手指引
-
-### 第8步：提示手动调整清单（API 限制）
-
-由于飞书 bitable API 的部分限制，以下 4 个字段需要在 Base UI 中手动调整：
+由于飞书 Base API 的部分限制，以下字段需要在 Base UI 中手动调整：
 
 ```
 ⚠️ 请在 Base UI 中手动调整以下字段：
@@ -271,7 +273,8 @@ Base 链接：https://zhuanspirit.feishu.cn/base/{base_token}
 
 | 场景 | 处理方式 |
 |------|---------|
-| 项目名已注册 | 询问是否覆盖，如否则中断 |
+| 项目名已注册且资源完整 | 提示"项目已初始化，如需重建请先 pmo-use {name} --archive" |
+| 项目名已注册但资源不完整 | 自动进入断点恢复模式，跳过已存在资源，继续未完成步骤 |
 | 知识空间创建失败 | 提示手动创建，提供指引 |
 | Base 创建失败 | 提示手动创建 |
-| 用户中途退出 | 已创建资源不清理，提示可重试 |
+| 用户中途退出 | 已创建资源保留在 registry 中，重跑时自动恢复 |

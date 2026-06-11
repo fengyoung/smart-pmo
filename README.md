@@ -1,6 +1,6 @@
 # Smart-PMO
 
-> 基于 Claude Code + 飞书 CLI + 飞书智能体 Bot 的项目管理工具集
+> 基于 Claude Code + 飞书 CLI 的项目管理工具集
 
 ---
 
@@ -10,9 +10,9 @@ Smart-PMO 是一套项目管理的 Skill 集合，通过一系列可复用的 Cl
 
 **核心特点：**
 - 🔄 **多项目支持** — 集中注册表管理，`pmo-use` 热切换
-- 🤖 **飞书智能体 Bot** — 定时推送 + 群聊交互，无需自建服务
 - 📊 **统一数据源** — 多维表格 Base 是唯一 truth
 - 📁 **文档知识库** — 每个项目独立知识空间
+- 👥 **团队协作** — 安装 Claude Code 者用 CLI，其他人直接使用 Base
 
 ## Skill 列表
 
@@ -32,10 +32,11 @@ Smart-PMO 是一套项目管理的 Skill 集合，通过一系列可复用的 Cl
 ## 架构概览
 
 ```
-Claude Code (本地)          飞书智能体 Bot (平台)
-    │                            │
-    │ AI 密集型操作                │ 定时推送 + @Bot 交互
-    │ 会议处理/待办提取/归档       │ 查/写 Base
+Claude Code (本地)
+    │
+    │ AI 密集型操作
+    │ 会议处理/待办提取/归档/周报
+    │
     └──────────┬─────────────────┘
                │
      ┌─────────▼─────────┐
@@ -57,16 +58,14 @@ cd ~/MyProjects/smart-pmo && bash setup.sh
 ```
 
 **前置依赖：**
-- `lark-cli` 已安装并完成认证（`npm install -g lark-cli && lark-cli auth`）
+- `@larksuite/cli` 已安装并完成认证（`npm install -g @larksuite/cli && lark-cli auth login`）
 - Claude Code 已安装
-- 已在飞书开放平台创建智能体 Bot 应用
 
 ### 初始化第一个项目
 
 ```bash
 # 交互式创建
 claude pmo-init
-# 按提示输入：项目名、PM、成员、群、Bot 凭据
 ```
 
 ### 日常使用
@@ -96,20 +95,20 @@ claude pmo-use <项目名>
 4. claude pmo-list        │ 验证一切正常           │
 ```
 
-> ⚠️ `~/.smart-pmo/registry/` 包含 appSecret 和成员 open_id，**不要放入 Git**。迁移时手动复制或用加密方式传输。
+> ⚠️ `~/.smart-pmo/registry/` 包含成员 open_id，**不要放入 Git**。迁移时手动复制或用加密方式传输。
 
 ## 文档索引
 
 - [需求清单](REQUIREMENTS.md) — 完整需求定义
 - [Base 表设计](designs/base-tables.md) — 多维表格字段定义
 - [配置 Schema](designs/config-schema.md) — 配置文件结构
-- [Bot 配置指南](designs/bot-setup-guide.md) — 飞书智能体配置步骤
+- [Bot 配置指南](designs/bot-setup-guide.md) — 飞书智能体配置步骤（已归档）
 - [Skill 详细规格](designs/skill-specs/) — 各 Skill 执行流程
 
 ## 实施路线
 
 | 阶段 | 内容 |
 |------|------|
-| **阶段一（P0）** | pmo-init + pmo-meeting-process + pmo-todo-from-chat + pmo-todo-followup + pmo-archive + pmo-use/pmo-list + Bot 配置 |
+| **阶段一（P0）** | pmo-init + pmo-meeting-process + pmo-todo-from-chat + pmo-todo-followup + pmo-archive + pmo-use/pmo-list |
 | **阶段二（P1）** | pmo-milestone + pmo-weekly-report + pmo-dashboard/pmo-pin |
-| **阶段三（P2）** | 飞书智能体 Bot 深度增强 |
+| **阶段三（P2）** | pmo-search + 持续完善 |

@@ -63,12 +63,7 @@
       "milestones": "string (必填) — 里程碑 表 ID",
       "meetingIndex": "string (必填) — 会议记录索引 表 ID"
     },
-    "chatIds": ["string — 项目群 ID，至少填1个"],
-    "bot": {
-      "appId": "string (必填) — 飞书自建应用 App ID",
-      "appSecret": "string (必填) — 凭据引用，支持两种格式（见下方安全说明）",
-      "name": "string (可选) — Bot 名称"
-    }
+    "chatIds": ["string — 项目群 ID，至少填1个"]
   },
 
   "chat": {
@@ -77,27 +72,6 @@
   }
 }
 ```
-
-### appSecret 安全存储
-
-`bot.appSecret` 字段**不存储明文密钥**，支持两种引用格式：
-
-**格式1：macOS Keychain（推荐）**
-```json
-"appSecret": "@keychain:<service-name>"
-```
-- `pmo-init` 时通过 `security add-generic-password -s <service-name> -a smart-pmo -w <secret>` 写入 Keychain
-- 读取时通过 `security find-generic-password -s <service-name> -w` 解析
-- 示例：`"appSecret": "@keychain:smart-pmo-ICS-bot"`
-
-**格式2：环境变量**
-```json
-"appSecret": "$env:SMART_PMO_ICS_SECRET"
-```
-- 从 shell 环境变量中读取，适合 CI 或多人共享场景
-- 示例：在 `.zshrc` 中 `export SMART_PMO_ICS_SECRET=xxx`
-
-所有 Skill 在读取 `appSecret` 字段时，必须先判断格式并解析，不能直接使用原始字符串。
 
 ### 示例文件
 
@@ -128,12 +102,7 @@
       "milestones": "tbl_mile_001",
       "meetingIndex": "tbl_meet_001"
     },
-    "chatIds": ["oc_chat_001"],
-    "bot": {
-      "appId": "cli_abc123",
-      "appSecret": "@keychain:smart-pmo-ICS-bot",
-      "name": "ICS-PMO-Bot"
-    }
+    "chatIds": ["oc_chat_001"]
   },
   "chat": {
     "lastReadMessageId": "",

@@ -107,7 +107,7 @@ claude pmo-todo-followup --modify TODO-003 --due 2026-06-20
 
 ---
 
-## 推送到项目群格式
+## 输出格式
 
 执行完成后可选项，推送待办状态到项目群：
 
