@@ -1,7 +1,7 @@
 ---
 name: pmo-export
 version: 1.0.0
-description: "数据导出：将项目 Base 表的待办/里程碑/会议索引数据导出为 CSV 或 JSON 文件，方便离线分析和数据迁移。"
+description: "导出项目 Base 数据为 CSV 或 JSON 文件。支持指定导出表、格式、输出路径。CSV 采用 UTF-8 BOM 编码以兼容 Excel 直接打开。"
 metadata:
   requires:
     bins: []
@@ -14,10 +14,10 @@ metadata:
 ## 执行方式
 
 ```bash
-# 导出当前项目的所有表数据（CSV 格式）
+# 导出当前项目全部三张表（默认 CSV 格式）
 claude pmo-export
 
-# 指定导出格式
+# 指定格式
 claude pmo-export --format csv
 claude pmo-export --format json
 
@@ -25,9 +25,10 @@ claude pmo-export --format json
 claude pmo-export --table todos
 claude pmo-export --table milestones
 claude pmo-export --table meetings
+claude pmo-export --table todos,milestones
 
-# 指定输出目录
-claude pmo-export --output ~/Desktop/pmo-export/
+# 指定输出路径（默认输出到当前目录 ./{project_id}_{date}/）
+claude pmo-export --output ~/Desktop/pmo-export
 ```
 
 ## 前置条件
@@ -36,64 +37,77 @@ claude pmo-export --output ~/Desktop/pmo-export/
 
 ## 执行流程
 
-### 第1步：读取数据
+### 第1步：解析参数
 
-从 Base 各表读取全部记录（自动分页，每页最多 500 条）：
+```
+format  = --format 参数（默认 csv）
+tables  = --table 参数解析为列表（默认 todos, milestones, meetings 全部）
+output  = --output 参数（默认 ./{project_id}_{YYYYMMDD}/）
+```
 
-- **待办事项表**：所有记录
-- **里程碑表**：所有记录
-- **会议记录索引表**：所有记录
+**输出目录处理：**
+- 若目录已存在 → 提示 `输出目录 {path} 已存在，是否覆盖？[y/N]`
+- 用户选择 N → 在目录名后追加 `-2`（如 `export_20260611-2`）
 
-### 第2步：格式转换
+### 第2步：分页拉取 Base 数据
 
-**CSV 格式（默认）：**
-- 第一行为表头（字段中文名）
-- 人员字段转换为姓名展示
-- 关联字段转换为关联记录 ID 列表
-- 日期字段格式化为 YYYY-MM-DD
-- 编码为 UTF-8 BOM（兼容 Excel 打开）
+对每个目标表，通过 `lark-base` 分页查询（每页 500 条，自动翻页直至读完）：
 
-**JSON 格式：**
-- 输出为 JSON 数组，每个记录一个对象
-- 保留原始字段名和值
-- 关联字段保留原始 record_id
+| 表 | 对应 config 字段 | 输出文件名 |
+|----|----------------|-----------|
+| 待办事项 | `baseTableIds.todos` | `todos.csv / todos.json` |
+| 里程碑 | `baseTableIds.milestones` | `milestones.csv / milestones.json` |
+| 会议记录索引 | `baseTableIds.meetingIndex` | `meetings.csv / meetings.json` |
+
+**引用字段展开（避免导出原始 ID）：**
+- 人员字段（负责人、参会人）→ 导出 `姓名` 字符串（多人时逗号分隔）
+- 关联字段（所属会议、关联待办、产出待办）→ 导出关联记录的自动编号 ID（如 `MEET-001`，多值逗号分隔）
+- 日期字段 → 格式 `YYYY-MM-DD`
+- 日期时间字段 → 格式 `YYYY-MM-DD HH:MM`
 
 ### 第3步：写入文件
 
-```
-输出目录结构（默认 ~/Desktop/pmo-export/）：
+**CSV 格式：**
+- 编码：UTF-8 BOM（`﻿` 前缀），确保 Excel 直接打开不乱码
+- 首行为字段名（中文）
+- 每行一条记录
 
-{项目名}_{导出日期}/
-├── todos.csv          (或 todos.json)
-├── milestones.csv     (或 milestones.json)
-├── meeting_index.csv  (或 meeting_index.json)
-└── export_info.txt    (导出元信息)
-```
+**JSON 格式：**
+- 整体结构：
+  ```json
+  {
+    "exportedAt": "2026-06-11T10:00:00",
+    "project": "项目名",
+    "table": "待办事项",
+    "totalCount": 42,
+    "records": [...]
+  }
+  ```
+- 每条记录保留原始字段名（中文），引用字段已展开
 
-`export_info.txt` 内容：
-```
-项目: {项目名} ({代号})
-导出时间: 2026-06-11T15:30:00
-配置版本: v1.1
-表统计:
-  - 待办事项: {N} 条
-  - 里程碑: {N} 条
-  - 会议记录: {N} 条
-导出格式: CSV
+同时输出一个 `export_meta.json` 汇总文件：
+
+```json
+{
+  "exportedAt": "2026-06-11T10:00:00",
+  "project": "项目名（项目代号）",
+  "tables": {
+    "todos": {"count": 42, "file": "todos.csv"},
+    "milestones": {"count": 8, "file": "milestones.csv"},
+    "meetings": {"count": 15, "file": "meetings.csv"}
+  }
+}
 ```
 
 ### 第4步：完成确认
 
 ```
-✅ 数据导出完成
-
-导出位置: ~/Desktop/pmo-export/{项目名}_2026-06-11/
-  📄 todos.csv          — {N} 条待办
-  📄 milestones.csv     — {N} 条里程碑
-  📄 meeting_index.csv  — {N} 条会议记录
-  📄 export_info.txt    — 导出元信息
-
-总记录数: {N} 条
+✅ 导出完成 — {项目名}
+   📁 输出目录: {path}
+   ├── todos.csv        (42 条)
+   ├── milestones.csv   (8 条)
+   ├── meetings.csv     (15 条)
+   └── export_meta.json
 ```
 
 ## 异常处理
@@ -101,7 +115,7 @@ claude pmo-export --output ~/Desktop/pmo-export/
 | 场景 | 处理 |
 |------|------|
 | 无当前项目 | 提示运行 pmo-use |
-| Base 连接失败 | 提示某表读取失败，继续导出成功的表 |
-| 某表无记录 | 该表文件内容为空（仅表头），输出标注"无数据" |
-| 输出目录已存在 | 询问是否覆盖 |
-| 磁盘空间不足 | 提示释放空间 |
+| 某表查询失败 | 跳过该表，提示 ⚠️ 并继续导出其他表 |
+| 某表无记录 | 仍创建文件（CSV 只有表头行，JSON records 为空数组） |
+| 输出目录无写权限 | 提示权限错误，建议换路径 |
+| 数据量超大（>5000条）| 分批拉取，展示进度条（每 500 条 1 批）|

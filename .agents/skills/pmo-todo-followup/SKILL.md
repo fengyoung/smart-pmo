@@ -1,7 +1,7 @@
 ---
 name: pmo-todo-followup
-version: 1.1.0
-description: "待办事项跟进：查看、筛选、标记完成、修改负责人/截止日期。支持 --mine/--overdue/--status/--all/--complete/--modify 参数。列表展示带行序号，支持用序号代替 TODO-ID 操作。"
+version: 1.2.0
+description: "待办事项跟进：查看、筛选、标记完成、修改负责人/截止日期。支持 --mine/--overdue/--status/--all/--complete/--modify 参数。--all 模式下支持 --project 指定目标项目，无需切换上下文。"
 metadata:
   requires:
     bins: []
@@ -43,6 +43,10 @@ claude pmo-todo-followup --complete --all-mine
 # 修改待办（支持 TODO-ID 或行序号）
 claude pmo-todo-followup --modify 3 --assign @李四
 claude pmo-todo-followup --modify TODO-003 --due 2026-06-20
+
+# --all 模式下直接操作指定项目（无需切换上下文）
+claude pmo-todo-followup --all --complete TODO-003 --project XRay
+claude pmo-todo-followup --all --modify TODO-003 --due 2026-06-20 --project XRay
 ```
 
 ## 前置条件
@@ -110,9 +114,16 @@ claude pmo-todo-followup --modify TODO-003 --due 2026-06-20
 └──┴──────┴─────────────────┴──────────┴──────────┴────────┘
 ```
 
-**`--all` 模式下使用 `--complete`**：
-- 每个项目的序号独立（从 1 开始），需先 `pmo-use <项目名>` 切换项目再用序号操作
-- 或直接用 TODO-ID：`pmo-todo-followup --complete TODO-003`（在 --all 模式下需搭配 `--project {project_id}`）
+**`--all` 模式下使用 `--complete` / `--modify`**：
+
+有三种操作方式，按优先级依次：
+1. **使用 `--project <项目名>`**（推荐）：直接指定目标项目，无需切换上下文
+   ```
+   pmo-todo-followup --all --complete TODO-003 --project XRay
+   pmo-todo-followup --all --modify TODO-003 --due 2026-06-20 --project XRay
+   ```
+2. **使用 TODO-ID 且 ID 全局唯一**：自动从所有项目查找该 ID 所属项目，找到唯一匹配时直接操作
+3. **使用行序号**：序号在 --all 模式下各项目独立（从 1 开始），需搭配 `--project` 指定目标项目；否则提示先切换上下文
 
 ### 标记完成 (--complete)
 

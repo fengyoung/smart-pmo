@@ -253,6 +253,16 @@ config.chat.readPositions["<chat_id>"].lastReadTime        各群上次读取时
 | `.pending_assignee/` | 负责人 API 写入失败 | pmo-todo-followup 执行时提示用户手动分配 |
 | `.draft/` | 用户取消的解析草稿 | pmo-meeting-process 执行同文件时提示恢复 |
 
+**待处理队列过期清理规则：**
+
+| 目录 | 过期阈值 | 过期处理方式 |
+|------|---------|------------|
+| `.pending_backfill/` | 30 天 | 提示"存在 30 天前的未完成回填记录，可能已失效，是否清除？[y/N]" |
+| `.pending_assignee/` | 30 天 | 提示"存在 30 天前的待分配负责人记录，可能已过期，是否清除？[y/N]" |
+| `.draft/` | 7 天 | 提示"检测到过期草稿（{date}），是否删除？[y/N]" |
+
+检查逻辑：读取文件中的 `failed_at` / `cached_at` 字段，与 `currentDate` 比较。文件缺少时间戳则按文件 mtime 计算。过期记录不自动删除，需用户确认。
+
 ### 公共：Base 写入负责人字段格式（所有 Skill 统一遵循）
 
 写入 Base 负责人字段（user类型）时，**必须使用以下格式**，缺一不可：

@@ -73,15 +73,16 @@
 ## pmo-todo-from-chat
 
 ### Happy Path
-- [ ] `claude pmo-todo-from-chat` — 增量读取 → AI 提取 → 确认 → 写入
+- [ ] `claude pmo-todo-from-chat` — 增量读取所有群 → AI 提取 → 确认 → 写入
+- [ ] 多群项目：两个群的消息均被读取，来源标注群名
 - [ ] 优先级推断正确（紧急 → P0，尽快 → P1，默认 → P2）
-- [ ] lastReadMessageId 正确推进
+- [ ] 各群 readPositions 分别正确推进
 
 ### Edge Cases
-- [ ] 无新消息 → 提示无新消息
+- [ ] 所有群均无新消息 → 提示无新消息
 - [ ] 未提取到待办 → 提示未识别
 - [ ] "已存在"条目不占用序号、不可选
-- [ ] 写入失败 → lastReadMessageId 不推进
+- [ ] 某群写入失败 → 该群 readPosition 不推进，其他群正常
 
 ---
 
@@ -92,6 +93,7 @@
 - [ ] `claude pmo-todo-followup --mine` — 仅显示我的待办
 - [ ] `claude pmo-todo-followup --overdue` — 仅显示过期
 - [ ] `claude pmo-todo-followup --complete 1` — 行序号完成
+- [ ] `claude pmo-todo-followup --all --complete TODO-003 --project XRay` — --all 模式下指定项目操作
 - [ ] `claude pmo-todo-followup --complete TODO-003` — TODO-ID 完成
 - [ ] `claude pmo-todo-followup --modify 1 --due 2026-07-01` — 修改截止日期
 
@@ -105,14 +107,17 @@
 ## pmo-milestone
 
 ### Happy Path
-- [ ] `claude pmo-milestone` — 显示所有里程碑
+- [ ] `claude pmo-milestone` — 显示所有里程碑（含行序号）
 - [ ] `claude pmo-milestone --check` — 显示到期检查结果
 - [ ] `claude pmo-milestone --add "test" --due 2026-12-31 --owner @张三` — 新增
-- [ ] `claude pmo-milestone --complete MILE-001` — 标记完成
+- [ ] `claude pmo-milestone --complete MILE-001` — 用 MILE-ID 标记完成
+- [ ] `claude pmo-milestone --complete 2` — 用行序号标记完成
+- [ ] `claude pmo-milestone --modify 1 --progress 75` — 用行序号修改进度
 
 ### Edge Cases
 - [ ] 无里程碑 → 显示空列表
 - [ ] 新增时负责人未匹配 → 留空并提示
+- [ ] 用序号但未先查看 → 自动查看后再操作
 
 ---
 
@@ -121,10 +126,13 @@
 ### Happy Path
 - [ ] `claude pmo-weekly-report` — 生成本周周报
 - [ ] `claude pmo-weekly-report --no-compare` — 不对比上周
+- [ ] `claude pmo-weekly-report --send` — 生成后推送摘要卡片到项目群
+- [ ] 逾期趋势等估算数据附注 `*估算` 标记
 
 ### Edge Cases
 - [ ] 本周无会议 → 正常生成，会议部分显示"无"
 - [ ] 已生成过本周周报 → 询问是否覆盖
+- [ ] `--send` 推送失败 → 提示 ⚠️ 但周报已归档
 
 ---
 
@@ -158,21 +166,23 @@
 ## pmo-today
 
 ### Happy Path
-- [ ] `claude pmo-today` — 显示今日概览
-- [ ] `claude pmo-today --all` — 跨项目今日概览
+- [ ] `claude pmo-today` — 显示今日截止、过期待办、里程碑、今日会议
+- [ ] `claude pmo-today --all` — 跨项目今日概览，按项目分组展示
 
 ### Edge Cases
-- [ ] 今日无关注项 → 显示成功消息
-- [ ] Base 连接失败 → 优雅降级
+- [ ] 今日无任何关注项 → 显示"今天没有需要特别关注的事项"+ 待处理总数
+- [ ] Base 连接失败 → 对应项目显示 ⚠️，其他正常
 
 ---
 
 ## pmo-search
 
 ### Happy Path
-- [ ] `claude pmo-search 接口` — 在当前项目搜索
+- [ ] `claude pmo-search 接口` — 在当前项目搜索，显示来源字段
 - [ ] `claude pmo-search 接口 --in todos` — 限定表范围
 - [ ] `claude pmo-search 接口 --all` — 跨项目搜索
+- [ ] `claude pmo-search 接口 --limit 50` — 每表最多返回 50 条
+- [ ] 结果达到 limit 上限时显示"共 {total} 条"提示
 
 ### Edge Cases
 - [ ] 无结果 → 显示搜索建议
@@ -211,7 +221,9 @@
 
 - [ ] 完整流程：pmo-init → pmo-use → pmo-info → 检查数据一致性
 - [ ] 会议闭环：pmo-meeting-process → pmo-todo-followup 查看待办 → pmo-todo-followup --complete → 状态正确
-- [ ] 群聊闭环：pmo-todo-from-chat → 写入成功 → lastReadMessageId 推进 → 再次执行无重复
-- [ ] 周报闭环：多次操作后 → pmo-weekly-report → 统计数据与实际一致
+- [ ] 群聊闭环：pmo-todo-from-chat → 写入成功 → readPositions 按群推进 → 再次执行无重复
+- [ ] 多群场景：两个群都有新消息 → 均被提取 → 来源标注不同群名
+- [ ] 周报闭环：多次操作后 → pmo-weekly-report --send → 统计数据正确 + 群消息发出
 - [ ] 多项目切换：pmo-use A → pmo-list → pmo-use B → pmo-info → 数据隔离正确
 - [ ] 断点恢复：pmo-meeting-process 模拟失败 → pending_backfill 写入 → 下次 pmo-info 自动重试
+- [ ] 队列过期：手动将 pending_backfill 文件 failed_at 改为 31 天前 → 任一 pmo-* 执行时提示清理

@@ -1,7 +1,7 @@
 ---
 name: pmo-search
-version: 1.1.0
-description: "跨表跨项目搜索。支持在待办事项、里程碑、会议记录三张表中按关键词检索，返回匹配条目并附来源链接。已集成到 pmo-todo-followup、pmo-dashboard、pmo-info 的操作提示中。"
+version: 1.2.0
+description: "跨表跨项目搜索。支持在待办事项、里程碑、会议记录三张表中按关键词检索，返回匹配条目并附来源链接。已集成到 pmo-todo-followup、pmo-dashboard、pmo-info 的操作提示中。支持 --limit 控制结果数量。"
 metadata:
   requires:
     bins: []
@@ -33,6 +33,9 @@ claude pmo-search <关键词> --since 2026-05-01 --until 2026-06-01
 
 # 限定负责人
 claude pmo-search <关键词> --owner @张三
+
+# 限制每表返回条数（默认 20，可调整至 50/100）
+claude pmo-search <关键词> --limit 50
 ```
 
 ## 前置条件
@@ -68,7 +71,13 @@ owner     = --owner 解析后的 openId（可选）
 - 匹配字段：会议主题、讨论要点摘要、关键决策
 - 附加过滤：--since/--until → 会议日期
 
-每张表最多返回 20 条匹配记录（按相关性/时间倒序）。
+每张表最多返回 `--limit` 指定的条数（默认 20，最大 100，按相关性/时间倒序）。
+
+**超限提示：** 查询结果达到 `--limit` 上限时，在结果底部显示：
+```
+  ── 仅显示前 {limit} 条，共 {total} 条匹配 ──
+  使用 --limit 50 查看更多，或缩小关键词 / 时间范围
+```
 
 ### 第3步：语义相关性排序
 

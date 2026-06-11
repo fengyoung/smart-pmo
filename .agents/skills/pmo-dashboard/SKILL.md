@@ -87,3 +87,9 @@ claude pmo-dashboard
 - 选择 `2`：执行 `pmo-use {项目名}` 后执行 `pmo-todo-followup --overdue`
 - 选择 `3` 或直接回车：结束
 - 若无告警项：静默结束，不显示下钻提示
+
+**定时巡检提示（无告警时底部展示）：**
+
+```
+  提示：/loop 30m pmo-dashboard 可开启每30分钟自动刷新巡检
+```

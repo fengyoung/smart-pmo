@@ -1,7 +1,7 @@
 ---
 name: pmo-todo-from-chat
-version: 1.1.0
-description: "从项目群聊消息中自动提取待办事项。读取群聊未处理消息，AI 分析提取待办，经用户确认后写入 Base 待办表。内置3层去重机制避免重复录入。"
+version: 1.2.0
+description: "从项目群聊消息中自动提取待办事项。支持多群并发读取，AI 分析提取待办，经用户确认后写入 Base 待办表。内置3层去重机制避免重复录入。"
 metadata:
   requires:
     bins: []
@@ -22,7 +22,8 @@ claude pmo-todo-from-chat
 ## 前置条件
 
 1. 已通过 `pmo-use` 设置当前项目
-2. 项目配置中已有 `chat.lastReadMessageId`（首次执行为空）
+2. 项目配置中有 `larkResources.chatIds`（至少一个群 ID）
+3. `chat.readPositions[<chat_id>]` 为首次执行时自动初始化（读最近 7 天）
 
 ## 执行流程
 
@@ -30,26 +31,37 @@ claude pmo-todo-from-chat
 
 ```python
 config = get_current_project_config()
-# 优先使用 chatIds[0] 作为主群聊（后续多群聊支持时遍历所有 chat_id）
-chat_id = config["larkResources"]["chatIds"][0]
-read_positions = config["chat"]["readPositions"]  # { "<chat_id>": { lastReadMessageId, lastReadTime } }
-# 兼容旧版配置（schemaVersion < 1.1）：若 readPositions 不存在，回退读取 chat.lastReadMessageId
-position = read_positions.get(chat_id, {}) if read_positions else {"lastReadMessageId": config.get("chat", {}).get("lastReadMessageId", ""), "lastReadTime": config.get("chat", {}).get("lastReadTime", "")}
-last_msg_id = position.get("lastReadMessageId", "")
-last_read_time = position.get("lastReadTime", "")
+chat_ids = config["larkResources"]["chatIds"]  # 支持多群，遍历全部
+read_positions = config["chat"].get("readPositions", {})
 ```
 
-### 第2步：读取群聊消息
+对每个 `chat_id`，获取其读取位置（兼容旧版 schemaVersion < 1.1 的单值字段）：
 
-通过 `lark-im` 调用 `list_message`:
-- 如果 `last_msg_id` 为空 → 读取最近 7 天的消息（最多 100 条）
-- 如果不为空 → 从 `last_msg_id` 的下一条开始增量读取
+```python
+last_msg_id = {}
+for chat_id in chat_ids:
+    if chat_id in read_positions:
+        pos = read_positions[chat_id]
+    else:
+        # 旧配置兼容：单值字段迁移到第一个 chat_id
+        pos = {
+            "lastReadMessageId": config.get("chat", {}).get("lastReadMessageId", ""),
+            "lastReadTime":       config.get("chat", {}).get("lastReadTime", "")
+        }
+    last_msg_id[chat_id] = pos.get("lastReadMessageId", "")
+```
+
+### 第2步：并行读取所有群聊消息
+
+对 `chatIds` 中的每个群**并行**调用 `lark-im` 的 `list_message`：
+- 若该群 `last_msg_id` 为空 → 读取最近 7 天消息（最多 100 条）
+- 若不为空 → 从 `last_msg_id` 的下一条开始增量读取
 
 **消息过滤规则：**
 - 排除系统消息（type=system）
 - 排除纯表情/图片消息
 
-保留每条消息的 `message_id` 用于排重。
+保留每条消息的 `message_id` 和 `chat_id`（多群时用于结果归因和按群更新读取位置）。
 
 ### 第3步：AI 分析提取待办
 
@@ -127,20 +139,21 @@ last_read_time = position.get("lastReadTime", "")
 **L3 — 用户确认兜底：**
 - 展示结果给用户，提供 3 个选项：[全部写入] [选择写入] [取消]
 
-展示格式：
+展示格式（多群时在来源中标注群名）：
 
 ```
 📋 从群消息发现以下潜在待办
 ──────────────────────────
-分析范围: {last_read_time} ~ {now}
-分析消息: {N} 条
+分析范围: {earliest_last_read_time} ~ {now}
+分析消息: {N} 条（{群A名} {n1} 条，{群B名} {n2} 条）
 提取待办: {N} 条（{N} 条已在 Base 中）
 
 1. □ [新] {待办内容} | @{负责人} | 截止: {日期}
-   → 来源: {发言人} {时间}
+   → 来源: {群名} · {发言人} {时间}
 
 2. □ [新] {待办内容} | @??? | 截止: {日期}
    ⚠️ 负责人 "李四" 未匹配到飞书账号，请确认
+   → 来源: {群名} · {发言人} {时间}
 
 3. □ [新] {待办内容} | @{负责人}
    ⚠️ 截止时间未指定
@@ -167,21 +180,22 @@ last_read_time = position.get("lastReadTime", "")
 
 用户确认后：
 1. 通过 `lark-base` 将选中的待办写入「待办事项」表
-   - 来源 = "群聊"
+   - 来源 = "群聊:{群名}"（多群时区分来源）
    - 来源消息ID = 原始消息ID
    - 状态 = "待处理"
    - 优先级 = 根据消息语义推断（默认 P2-一般，见上方优先级推断规则）
 
-2. **写入成功后**，更新配置中的 `readPositions[chat_id]`：
-   - `lastReadMessageId` = 本批消息中最后一条的 ID
+2. **写入成功后**，按群分别更新配置中的 `readPositions[chat_id]`：
+   - `lastReadMessageId` = 该群本批消息中最后一条的 ID
    - `lastReadTime` = 当前时间 ISO 8601
-   - 写入失败时不更新，确保下次执行时能重试这批消息
+   - 某群写入失败时，该群的 readPosition 不更新（下次执行时重试该群）
+   - 其他群正常更新，互不影响
 
 ## 异常处理
 
 | 场景 | 处理 |
 |------|------|
-| 无新消息 | 提示"自 {lastReadTime} 以来无新消息" |
+| 无新消息 | 提示"自 {earliest_lastReadTime} 以来，{N} 个群均无新消息" |
 | 未提取到待办 | 提示"未识别到新待办" |
 | 连接失败 | 提示稍后重试 |
 
