@@ -1,7 +1,7 @@
 # Smart-PMO 项目手册
 
 > 基于 Claude Code + 飞书 CLI 的项目管理工具集
-> 项目版本：见根目录 `VERSION` 文件（当前 v1.1.0）
+> 项目版本：见根目录 `VERSION` 文件（当前 v1.2.0）
 
 ---
 
@@ -223,14 +223,45 @@ config.chat.readPositions["<chat_id>"].lastReadTime        各群上次读取时
 识别到姓名或 @提及 时，**写入 Base 前必须按以下顺序解析为 openId**：
 
 ```
-1. 在 config.team.members 中精确匹配 name 字段
+1. 在 config.team.members 中精确匹配 name 字段 → 获得 openId 和姓名
 2. 精确匹配失败 → 尝试模糊匹配（去掉姓前缀或名后缀）
-3. 仍匹配不到 → 通过 lark-contact 搜索飞书通讯录（按姓名关键词）
+3. 仍匹配不到 → 通过 lark-contact 搜索飞书通讯录（按姓名关键词）→ 获取 open_id 和 localized_name
 4. 搜索返回多个候选 → 在确认界面列出，让用户选择
 5. 无结果 → 负责人字段留空，标注 ⚠️ @{姓名} 未匹配，请手动指定
 ```
 
+**负责人字段写入格式（⚠️ 关键）：**
+写入 Base 时必须同时传 `id` 和 `name`，仅传 `id` 会触发 `1254066 UserFieldConvFail`：
+```json
+{"负责人": [{"id": "ou_xxx", "name": "姓名"}]}
+```
+
+**负责人写入失败降级：**
+- API 写入失败时自动将负责人姓名写入备注字段（格式：`负责人: {姓名列表}`）
+- 记录到 `~/.smart-pmo/.pending_assignee/{project_id}.json`
+- `pmo-todo-followup` 执行时检查并提示
+
 未匹配的负责人不阻塞写入流程，但在用户确认界面必须明确标注。
+
+### 公共：待处理队列（所有 Skill 统一遵循）
+
+所有 `pmo-*` Skill 执行时先检查以下三个目录：
+
+| 目录 | 用途 | 处理方式 |
+|------|------|---------|
+| `.pending_backfill/` | 会议索引回填失败 | 自动重试回填，成功删文件 |
+| `.pending_assignee/` | 负责人 API 写入失败 | pmo-todo-followup 执行时提示用户手动分配 |
+| `.draft/` | 用户取消的解析草稿 | pmo-meeting-process 执行同文件时提示恢复 |
+
+### 公共：Base 写入负责人字段格式（所有 Skill 统一遵循）
+
+写入 Base 负责人字段（user类型）时，**必须使用以下格式**，缺一不可：
+
+```json
+{"负责人": [{"id": "ou_xxx", "name": "飞书通讯录中的姓名"}]}
+```
+
+> ⚠️ 仅传 `{"id": "ou_xxx"}` 会触发 `1254066 UserFieldConvFail`。多负责人时数组中追加对象。
 
 ### 公共：日期计算（所有 Skill 统一遵循）
 
