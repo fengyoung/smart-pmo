@@ -189,8 +189,8 @@ config = get_current_project_config()
 **① 生成会议纪要文档：**
 - 使用模板创建结构化会议纪要
 - 通过 `lark-doc` 创建飞书文档，获取 `doc_url`
-- 通过 `lark-wiki` 归档到 `01-会议纪要/{YYYY-MM-DD}-{主题}`
-- 命名冲突处理：若同名文档已存在，追加序号（如 `2026-06-09-Sprint评审-2`）
+- 通过 `lark-wiki` 归档到 `01-会议纪要/{YYYYMMDD}-{title}`
+- 命名冲突处理：若同名文档已存在，追加序号（如 `20260609-Sprint评审-2`）
 - `--sub-project` 时：文档标题加注 `{主项目}周会 — {sub-project}专题`
 
 **② 写入 Base 会议记录索引表（先写，获取 meeting_record_id）：**
