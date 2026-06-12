@@ -1,6 +1,6 @@
 ---
 name: pmo-today
-version: 1.0.0
+version: 1.2.0
 description: "今日概览：展示今日截止待办、已过期待办、7天内到期里程碑、今日会议。快速定位当天需要处理的事项。支持 --all 跨所有关注项目。"
 metadata:
   requires:
@@ -26,6 +26,24 @@ claude pmo-today --all
 已通过 `pmo-use` 设置当前项目（`--all` 模式不需要）。
 
 ## 执行流程
+
+### 公共：待处理队列检查
+
+执行前先检查以下目录（按 CLAUDE.md 公共约定）：
+
+| 目录 | 用途 | 处理方式 |
+|------|------|---------|
+| `~/.smart-pmo/.pending_backfill/` | 会议索引回填失败 | 自动重试回填，成功删文件 |
+| `~/.smart-pmo/.pending_assignee/` | 负责人 API 写入失败 | 提示用户存在待分配记录 |
+| `~/.smart-pmo/.draft/` | 用户取消的解析草稿 | 提示用户存在缓存草稿 |
+
+过期清理规则见 CLAUDE.md「待处理队列过期清理规则」。
+
+### 配置加载
+
+1. 按 CLAUDE.md「读取当前项目配置」规则加载项目配置（--all 模式：遍历 pinned 或所有 active 项目）
+2. 检查 `schemaVersion`，执行必要的版本迁移
+3. 执行配置完整性校验（必填字段：`project.name`、`larkResources.baseAppToken`、`larkResources.baseTableIds.*`）
 
 ### 第1步：确定目标项目列表
 
@@ -112,3 +130,15 @@ claude pmo-today --all
 | 无当前项目（非 --all 模式）| 提示运行 pmo-use |
 | 单个项目 Base 查询失败 | 该项目显示 ⚠️ 查询失败，不影响其他项目 |
 | --all 且无任何项目 | 提示"无已注册项目，请先运行 pmo-init" |
+| 所有项目 Base 查询失败 | 展示失败汇总 + 排查建议（登录状态、Base 权限、网络） |
+
+## 边缘情况
+
+| 场景 | 处理方式 |
+|------|---------|
+| 今日无任何关注项 | 显示待处理总数 + 进行中里程碑数 |
+| 今日有会议但无纪要 | 标注「待处理」，提示 pmo-meeting-process |
+| 今日有会议已有纪要 | 标注「已有纪要: [查看]」 |
+| 里程碑即将到期且进度低（<30%）| 额外标注 ⚠️ 进度 |
+| --all 时 pinned 为空 | 回退到所有 active 项目 |
+| 单项目 Base 查询失败 | 标注 ⚠️，其余正常 |

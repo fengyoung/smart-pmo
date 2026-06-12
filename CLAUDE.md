@@ -296,8 +296,8 @@ config.chat.readPositions["<chat_id>"].lastReadTime        各群上次读取时
 
 ## 实施路线
 
-| 阶段 | 内容 |
-|------|------|
-| **阶段一（P0）** | pmo-init + pmo-meeting-process + pmo-todo-from-chat + pmo-todo-followup + pmo-archive + pmo-use/pmo-list |
-| **阶段二（P1）** | pmo-milestone + pmo-weekly-report + pmo-dashboard/pmo-pin |
-| **阶段三（P2）** | pmo-search + 持续完善 |
+| 阶段 | 内容 | 状态 |
+|------|------|------|
+| **阶段一（P0）** | pmo-init + pmo-meeting-process + pmo-todo-from-chat + pmo-todo-followup + pmo-archive + pmo-use/pmo-list | ✅ 已完成 |
+| **阶段二（P1）** | pmo-milestone + pmo-weekly-report + pmo-dashboard/pmo-pin/pmo-unpin | ✅ 已完成 |
+| **阶段三（P2）** | pmo-search + pmo-export + pmo-today + pmo-info 全面升级 | ✅ 已完成 |

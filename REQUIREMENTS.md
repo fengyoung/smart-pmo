@@ -390,11 +390,11 @@ Smart-PMO 是一套基于 **Claude Code Skill 系统 + 飞书 CLI** 的项目管
 
 ## 九、实施路线
 
-| 阶段 | 内容 | 目标 |
-|------|------|------|
-| **阶段一（P0）** | pmo-init + pmo-meeting-process + pmo-todo-from-chat + pmo-todo-followup + pmo-archive + pmo-use/pmo-list | 核心闭环可用 |
-| **阶段二（P1）** | pmo-milestone + pmo-weekly-report + pmo-dashboard/pmo-pin | 管理维度完整 |
-| **阶段三（P2）** | pmo-search + 持续完善 | 检索增强 |
+| 阶段 | 内容 | 目标 | 状态 |
+|------|------|------|------|
+| **阶段一（P0）** | pmo-init + pmo-meeting-process + pmo-todo-from-chat + pmo-todo-followup + pmo-archive + pmo-use/pmo-list | 核心闭环可用 | ✅ 已完成 |
+| **阶段二（P1）** | pmo-milestone + pmo-weekly-report + pmo-dashboard/pmo-pin/pmo-unpin | 管理维度完整 | ✅ 已完成 |
+| **阶段三（P2）** | pmo-search + pmo-export + pmo-today + pmo-info 全面升级 + 持续完善 | 检索增强 + 工具链完整 | ✅ 已完成 |
 
 ---
 

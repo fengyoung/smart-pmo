@@ -42,12 +42,21 @@
 ## pmo-info
 
 ### Happy Path
-- [ ] `claude pmo-info` — 显示完整信息：诊断、成员、统计、链接
+- [ ] `claude pmo-info` — 显示完整信息：诊断、成员、统计、链接、快速操作
 - [ ] Base 统计正确（待办/里程碑/会议数目）
+- [ ] 配置诊断正确（schemaVersion、必填字段、Base连接、Wiki连接）
+- [ ] 资源链接正确拼接（Base URL / Wiki URL）
+- [ ] active 项目 vs archived 项目状态展示正确
 
 ### Edge Cases
 - [ ] 无当前项目 → 提示运行 pmo-use
 - [ ] Base 连接失败 → 优雅降级，统计显示 "-"
+- [ ] 资源 token 为空 → 显示"资源尚未初始化，请运行 pmo-init"
+- [ ] schemaVersion 不存在 → 视为 1.0，提示建议迁移
+- [ ] schemaVersion 过新 → 提示升级 Smart-PMO，中断执行
+- [ ] 配置不完整（缺必填字段）→ 显示警告，不阻塞展示
+- [ ] 成员列表为空 → 显示"未配置团队成员"
+- [ ] 项目状态为 archived → 标注 ⚠️ 已归档
 
 ---
 
@@ -211,10 +220,14 @@
 ### Happy Path
 - [ ] `claude pmo-today` — 显示今日截止、过期待办、里程碑、今日会议
 - [ ] `claude pmo-today --all` — 跨项目今日概览，按项目分组展示
+- [ ] 里程碑即将到期且进度 <30% → 额外标注 ⚠️ 进度
+- [ ] 今日有会议已有纪要 → 标注「已有纪要: [查看]」
 
 ### Edge Cases
 - [ ] 今日无任何关注项 → 显示"今天没有需要特别关注的事项"+ 待处理总数
 - [ ] Base 连接失败 → 对应项目显示 ⚠️，其他正常
+- [ ] --all 时 pinned 为空 → 回退到所有 active 项目
+- [ ] 所有项目 Base 查询失败 → 展示失败汇总 + 排查建议
 
 ---
 
@@ -225,24 +238,40 @@
 - [ ] `claude pmo-search 接口 --in todos` — 限定表范围
 - [ ] `claude pmo-search 接口 --all` — 跨项目搜索
 - [ ] `claude pmo-search 接口 --limit 50` — 每表最多返回 50 条
+- [ ] `claude pmo-search 接口 --since 2026-05-01 --until 2026-06-01` — 时间范围过滤
+- [ ] `claude pmo-search 接口 --owner @张三` — 按负责人过滤
 - [ ] 结果达到 limit 上限时显示"共 {total} 条"提示
 
 ### Edge Cases
-- [ ] 无结果 → 显示搜索建议
-- [ ] 无当前项目且未加 --all → 提示
+- [ ] 无结果 → 显示搜索建议（更短关键词 / --all / 检查时间范围）
+- [ ] 无当前项目且未加 --all → 提示运行 pmo-use 或加 --all
+- [ ] 关键词为空 → 提示"请输入搜索关键词"
+- [ ] --limit 超过 100 → 自动截断为 100
+- [ ] 某表查询失败 → 跳过该表，展示其他成功结果
+- [ ] --all 时 pinned 为空 → 回退到所有 active 项目
+- [ ] 所有项目所有表均失败 → 提示排查建议
+- [ ] --owner 姓名未匹配 → 提示 ⚠️ 未找到，按关键词搜索全部
 
 ---
 
 ## pmo-export
 
 ### Happy Path
-- [ ] `claude pmo-export` — 导出当前项目全部表
+- [ ] `claude pmo-export` — 导出当前项目全部表（CSV UTF-8 BOM）
 - [ ] `claude pmo-export --format json` — JSON 格式导出
 - [ ] `claude pmo-export --table todos` — 仅导出指定表
+- [ ] `claude pmo-export --table todos,milestones` — 导出多张表
+- [ ] `claude pmo-export --output ~/Desktop/export` — 指定输出路径
+- [ ] 引用字段正确展开（人员→姓名，关联→编号ID）
+- [ ] `export_meta.json` 汇总文件正确生成
 
 ### Edge Cases
-- [ ] 某表无记录 → 空文件（仅表头）
-- [ ] 输出目录已存在 → 询问是否覆盖
+- [ ] 某表无记录 → 空文件（CSV仅表头 / JSON空数组）
+- [ ] 输出目录已存在 → 询问覆盖，N 则自动追加 `-N` 后缀
+- [ ] 输出目录无写权限 → 提示权限错误
+- [ ] 数据量 >5000 条 → 分批拉取 + 进度条
+- [ ] 某表查询失败 → 跳过该表，继续导出其他表
+- [ ] 所有表均查询失败 → 提示排查建议
 
 ---
 

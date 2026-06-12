@@ -1,6 +1,6 @@
 ---
 name: pmo-export
-version: 1.0.0
+version: 1.2.0
 description: "导出项目 Base 数据为 CSV 或 JSON 文件。支持指定导出表、格式、输出路径。CSV 采用 UTF-8 BOM 编码以兼容 Excel 直接打开。"
 metadata:
   requires:
@@ -35,7 +35,27 @@ claude pmo-export --output ~/Desktop/pmo-export
 
 已通过 `pmo-use` 设置当前项目。
 
+**所有 Base 读操作在网络超时或 5xx 错误时自动重试（1s/3s/5s 退避）。**
+
 ## 执行流程
+
+### 公共：待处理队列检查
+
+执行前先检查以下目录（按 CLAUDE.md 公共约定）：
+
+| 目录 | 用途 | 处理方式 |
+|------|------|---------|
+| `~/.smart-pmo/.pending_backfill/` | 会议索引回填失败 | 自动重试回填，成功删文件 |
+| `~/.smart-pmo/.pending_assignee/` | 负责人 API 写入失败 | 提示用户存在待分配记录 |
+| `~/.smart-pmo/.draft/` | 用户取消的解析草稿 | 提示用户存在缓存草稿 |
+
+过期清理规则见 CLAUDE.md「待处理队列过期清理规则」。
+
+### 配置加载
+
+1. 按 CLAUDE.md「读取当前项目配置」规则加载项目配置
+2. 检查 `schemaVersion`，执行必要的版本迁移
+3. 执行配置完整性校验（必填字段：`project.name`、`larkResources.baseAppToken`、`larkResources.baseTableIds.*`）
 
 ### 第1步：解析参数
 
@@ -47,7 +67,7 @@ output  = --output 参数（默认 ./{project_id}_{YYYYMMDD}/）
 
 **输出目录处理：**
 - 若目录已存在 → 提示 `输出目录 {path} 已存在，是否覆盖？[y/N]`
-- 用户选择 N → 在目录名后追加 `-2`（如 `export_20260611-2`）
+- 用户选择 N → 在目录名后追加 `-2`（如 `export_20260611-2`），若 `-2` 也存在则递增
 
 ### 第2步：分页拉取 Base 数据
 
@@ -108,6 +128,8 @@ output  = --output 参数（默认 ./{project_id}_{YYYYMMDD}/）
    ├── milestones.csv   (8 条)
    ├── meetings.csv     (15 条)
    └── export_meta.json
+
+提示：使用 Excel 打开 CSV 时，选择「数据 → 从文本/CSV 导入」，文件编码选择 UTF-8
 ```
 
 ## 异常处理
@@ -118,4 +140,16 @@ output  = --output 参数（默认 ./{project_id}_{YYYYMMDD}/）
 | 某表查询失败 | 跳过该表，提示 ⚠️ 并继续导出其他表 |
 | 某表无记录 | 仍创建文件（CSV 只有表头行，JSON records 为空数组） |
 | 输出目录无写权限 | 提示权限错误，建议换路径 |
-| 数据量超大（>5000条）| 分批拉取，展示进度条（每 500 条 1 批）|
+| 数据量超大（>5000条）| 分批拉取，展示进度条（每 500 条 1 批） |
+| 所有表均查询失败 | 提示排查建议（Base 连接、权限） |
+| Base 查询超时 | 重试 3 次后跳过该表 |
+
+## 边缘情况
+
+| 场景 | 处理方式 |
+|------|---------|
+| 输出目录已存在 | 询问覆盖或自动追加 `-N` 后缀 |
+| 某表无记录 | 创建空文件（CSV 仅表头 / JSON 空数组） |
+| 目录无写权限 | 提示权限错误，建议换路径 |
+| 数据量 >5000 条 | 分批拉取 + 进度条展示 |
+| CSV 中文乱码 | 已用 UTF-8 BOM 编码，建议 Excel 导入方式 |
