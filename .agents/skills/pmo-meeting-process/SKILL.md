@@ -1,7 +1,7 @@
 ---
 name: pmo-meeting-process
-version: 1.2.0
-description: "处理会议录音/转写，自动提取纪要、关键决策和待办事项。支持飞书妙记和外部转写文件两种输入源。支持选择性写入、草稿缓存、独立建索引、多项目周会子专题提取。"
+version: 1.3.0
+description: "处理会议录音/转写，自动提取纪要、关键决策和待办事项。支持飞书妙记和外部转写文件两种输入源。支持选择性写入、草稿缓存、独立建索引、多项目周会子专题提取（含边界处理）。孤立会议记录自动保存并引导修复。"
 metadata:
   requires:
     bins: []
@@ -186,6 +186,20 @@ config = get_current_project_config()
 - `选择写入`：仅处理用户选中的待办，其余步骤照常
 - `--sub-project <项目名>`：在①的纪要文档中标注"提取自 {主项目} 周会，本文档为 {sub-project} 子专题"，②③使用 sub-project 的 Base 配置
 
+**`--sub-project` 边界情况处理：**
+
+| 情况 | 处理规则 |
+|------|---------|
+| sub-project 项目名未注册 | 提示"项目 {名称} 未注册，请先运行 pmo-init 或 pmo-use"，中断执行 |
+| sub-project 与当前项目相同 | 提示"--sub-project 不能与当前项目相同"，中断执行 |
+| 成员解析：成员姓名在主项目配置中存在 | 优先使用主项目 `team.members` 解析 openId |
+| 成员解析：主项目未匹配 → sub-project 配置 | 尝试 sub-project `team.members` 解析 |
+| 成员解析：两个项目均未匹配 | 通过 `lark-contact` 搜索飞书通讯录 |
+| 去重检查 | 仅在 sub-project 的待办表中检查，不跨到主项目 |
+| 文档归档 | 归档到 sub-project 知识库的 `01-会议纪要/` 目录 |
+| 会议索引 | 写入 sub-project 的会议记录索引表 |
+| 纪要文档标题格式 | `{YYYYMMDD}-{主项目}周会-{sub-project}专题` |
+
 **① 生成会议纪要文档：**
 - 使用模板创建结构化会议纪要
 - 通过 `lark-doc` 创建飞书文档，获取 `doc_url`
@@ -235,9 +249,10 @@ config = get_current_project_config()
 |--------|---------|
 | ①文档归档失败 | 跳过①，继续写②③，doc_url 留空，提示用户手动归档 |
 | ②会议索引写入失败 | 提示"会议索引未写入，待办将写入但无会议关联"，待办的所属会议字段留空 |
+| ②成功但③全部失败 | **孤立会议记录**：将 meeting_record_id + 原始待办内容保存到 `~/.smart-pmo/.pending_orphan_meeting/{project_id}.json`，提示用户执行 `--index-only` 补录 |
 | ③待办写入失败（部分） | 记录失败项，继续写成功的；④仍使用成功写入的 record_id |
-| ③待办负责人字段写入失败 | 自动降级：将负责人姓名写入备注字段，记录到 `.pending_assignee/`（见 P1-5） |
-| ④回填产出待办失败 | 提示"会议索引的产出待办关联未完成"，不影响已写入数据 |
+| ③待办负责人字段写入失败 | 自动降级：将负责人姓名写入备注字段，记录到 `.pending_assignee/` |
+| ④回填产出待办失败 | 记录到 `.pending_backfill/`，提示"会议索引的产出待办关联未完成"；见 CLAUDE.md 人工介入出口 |
 
 ## 异常处理
 
@@ -300,45 +315,35 @@ claude pmo-meeting-process --index-only "<会议主题>" "<会议日期>"
 
 ### 断点续传与待处理队列
 
-所有 `pmo-*` Skill 执行时，先检查以下三个目录是否有待处理项，按优先级自动处理：
+所有 `pmo-*` Skill 执行时，先检查以下四个目录是否有待处理项：
 
-**1. .pending_backfill/ — 会议索引回填失败**
+**1. .pending_backfill/ — 会议索引回填失败（步骤④）**
 
-步骤④（回填会议索引的产出待办）失败时写入：
+步骤④失败时写入，三次自动重试后仍失败时展示具体操作引导（见 CLAUDE.md「重试耗尽后的人工介入出口」）。
+
+**2. .pending_orphan_meeting/ — 孤立会议记录（步骤②成功+步骤③全部失败）**
 
 ```
-~/.smart-pmo/.pending_backfill/{project_id}.json
+~/.smart-pmo/.pending_orphan_meeting/{project_id}.json
 {
   "meeting_record_id": "rec_xxx",
-  "todo_record_ids": ["rec_yyy", "rec_zzz"],
-  "failed_at": "2026-06-11T15:30:00"
+  "meeting_topic": "Sprint评审",
+  "meeting_date": "2026-06-12",
+  "original_todos": [
+    {"content": "接口联调", "assignee": "李四", "due": "2026-06-15"},
+    ...
+  ],
+  "failed_at": "2026-06-12T10:00:00"
 }
 ```
 
-- 任何 `pmo-*` Skill 执行时检查此目录
-- 若存在 → 自动尝试回填，成功后删除
-- 多次失败 → 提示用户 "存在未完成的会议索引关联，请手动检查"
+- 检测到时提示：`⚠️ 发现孤立会议记录（{meeting_topic}·{meeting_date}），待办写入失败`
+- 操作引导：`claude pmo-meeting-process --index-only "{meeting_topic}" "{meeting_date}"`
 
-**2. .pending_assignee/ — 负责人写入失败（P1-5）**
+**3. .pending_assignee/ — 负责人写入失败**
 
-负责人字段 API 写入失败时写入：
+负责人字段 API 写入失败时写入，`pmo-todo-followup` 执行时提示用户手动分配（附 Base 记录链接）。
 
-```
-~/.smart-pmo/.pending_assignee/{project_id}.json
-{
-  "failed_records": [
-    {"record_id": "rec_xxx", "待办内容": "...", "expected_assignee": "王建勋", "failed_at": "..."}
-  ]
-}
-```
-
-- `pmo-todo-followup` 执行时检查并提示：
-  `⚠️ 检测到 {N} 条待办的负责人未能自动写入（API限制），请在 Base 中手动分配`
-- 用户确认已手动分配后可清除该文件
-
-**3. .draft/ — 用户取消的解析草稿（P1-4）**
+**4. .draft/ — 用户取消的解析草稿**
 
 用户选择「取消」时缓存解析结果（格式见上方草稿缓存机制）。
-
-- 下次执行 `pmo-meeting-process --file <同文件>` 时提示恢复
-- 草稿超过 7 天 → 提示 `📝 检测到过期草稿（{date}），是否删除？`

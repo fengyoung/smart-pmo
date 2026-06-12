@@ -132,8 +132,17 @@ claude pmo-todo-followup --all --modify TODO-003 --due 2026-06-20 --project XRay
 - `TODO-XXX` 格式 → 直接使用该 ID
 - 混合使用均支持：`--complete 1 TODO-005 3`
 
-**序号有效性检查：**
-如果使用序号操作，但本次会话中未先查看过列表（无法映射序号 → ID），自动先执行一次列表查询再继续完成操作。
+**行序号生命周期（⚠️ 重要）：**
+行序号仅在**当次展示的列表**中有效，以下情况会导致序号失效：
+- 任何会修改 Base 数据的操作（写入待办、标记完成、修改字段）
+- 切换项目（pmo-use）
+- 新的一次 Base 查询
+
+如果使用序号操作但本次会话中未先查看过列表（无法映射序号 → ID），**自动先重新执行一次列表查询**，再继续完成操作，并提示：
+```
+ℹ️ 序号映射已刷新（Base 可能已变更），以最新列表为准：
+   [展示刷新后的列表]
+```
 
 **单个或多个：**
 1. 通过 `lark-base update_record` 逐条更新：
@@ -148,7 +157,7 @@ claude pmo-todo-followup --all --modify TODO-003 --due 2026-06-20 --project XRay
 
 ### 修改待办 (--modify)
 
-**参数解析**：同 `--complete`，支持行序号或 TODO-ID。
+**参数解析**：同 `--complete`，支持行序号或 TODO-ID（行序号生命周期规则相同）。
 
 1. 通过 `lark-base update_record` 更新指定字段：
    - `--assign @姓名`：解析姓名为 openId（走成员名称解析逻辑）

@@ -1,7 +1,7 @@
 # Smart-PMO 项目手册
 
 > 基于 Claude Code + 飞书 CLI 的项目管理工具集
-> 项目版本：见根目录 `VERSION` 文件（当前 v1.3.0）
+> 项目版本：见根目录 `VERSION` 文件（当前 v1.4.0）
 
 ---
 
@@ -84,6 +84,12 @@ smart-pmo/
 ```
 
 **当前项目确定规则：** `$SMART_PMO_CURRENT` 环境变量 > `~/.smart-pmo/current` 文件
+
+**并发写保护：** 多个终端同时运行 `pmo-use` 切换项目会导致竞态，约定如下：
+- 写入 `current` 前先创建 `current.lock` 临时文件（内容为当前进程 PID + 时间戳）
+- 若 `current.lock` 已存在且距创建时间 < 10s → 等待 2s 后重试，最多重试 3 次
+- 若 `current.lock` 存在且超过 10s（残留锁）→ 直接覆盖，不等待
+- 写入完成后立即删除 `current.lock`
 
 ---
 
@@ -188,6 +194,18 @@ config.chat.readPositions["<chat_id>"].lastReadTime        各群上次读取时
 4. 校验不通过不阻塞操作，但在终端明确展示警告
 ```
 
+### 公共：超时配置（所有 Skill 统一遵循）
+
+所有 Base 查询操作统一使用以下超时阈值，**不在各 Skill 中硬编码**：
+
+| 场景 | 超时值 | 说明 |
+|------|-------|------|
+| 单次 Base 查询 | 20s | 单张表查询（列表、搜索） |
+| 并发多项目查询 | 30s | dashboard / today / list 等跨项目并发查询等待上限 |
+| 飞书 API 写操作 | 15s | create_record / update_record / wiki 归档等 |
+
+超时即视为失败，触发重试逻辑。
+
 ### 公共：错误重试策略（所有 Skill 统一遵循）
 
 所有飞书 API 写操作（Base 写入/更新、Wiki 创建、文档创建）遵循以下重试策略：
@@ -196,9 +214,28 @@ config.chat.readPositions["<chat_id>"].lastReadTime        各群上次读取时
 1. 首次失败 → 等待 1s 后重试
 2. 再次失败 → 等待 3s 后重试
 3. 第三次失败 → 等待 5s 后重试
-4. 三次均失败 → 记录错误详情，提示用户手动处理
+4. 三次均失败 → 记录错误详情，按下方"重试耗尽人工介入"规则处理
 5. 可重试错误类型：网络超时、API 限流(429)、5xx 服务端错误
 6. 不可重试错误类型：权限不足(403)、资源不存在(404)、参数错误(400)
+```
+
+**重试耗尽后的人工介入出口（所有 Skill 统一遵循）：**
+
+不同失败场景提供不同的具体操作引导，而不是仅提示"请手动处理"：
+
+| 失败场景 | 终端提示 | 具体操作引导 |
+|---------|---------|------------|
+| Base 会议索引写入失败 | `❌ 会议索引写入失败（{错误码}）` | `→ 请在 Base 中手动新增会议记录：{baseUrl}/table/{meetingIndex表ID}` |
+| Base 待办写入失败 | `❌ 待办写入失败（{错误码}）` | `→ 请在 Base 中手动新增待办：{baseUrl}/table/{todos表ID}` |
+| 会议索引回填失败（步骤④）| `❌ 产出待办关联回填失败，已保存到待处理队列` | `→ 下次执行任意 pmo-* 命令时自动重试；或执行 pmo-todo-followup 手动触发` |
+| Wiki 归档失败 | `❌ 知识库归档失败（{错误码}）` | `→ 请在 pmo-archive 手动归档：claude pmo-archive <文件路径>` |
+| 负责人字段写入失败 | `⚠️ 负责人字段写入失败，已写入备注列` | `→ 请在 Base 中手动分配：{record_url}` |
+
+**Base 记录 URL 构造规则（供上述提示使用）：**
+```
+baseUrl = https://bytedance.larkoffice.com/base/{config.larkResources.baseAppToken}
+记录 URL = {baseUrl}/table/{tableId}/record/{record_id}
+表 URL   = {baseUrl}/table/{tableId}
 ```
 
 ### 公共：知识库标准目录（所有 Skill 统一遵循）
@@ -245,19 +282,59 @@ config.chat.readPositions["<chat_id>"].lastReadTime        各群上次读取时
 
 ### 公共：待处理队列（所有 Skill 统一遵循）
 
-所有 `pmo-*` Skill 执行时先检查以下三个目录：
+所有 `pmo-*` Skill 执行时先检查以下四个目录：
 
 | 目录 | 用途 | 处理方式 |
 |------|------|---------|
-| `.pending_backfill/` | 会议索引回填失败 | 自动重试回填，成功删文件 |
+| `.pending_backfill/` | 会议索引"产出待办"回填失败 | 自动重试回填，成功删文件 |
+| `.pending_orphan_meeting/` | 会议索引已写入但待办写入失败（孤立会议记录）| 提示用户，建议 `--index-only` 补录待办 |
 | `.pending_assignee/` | 负责人 API 写入失败 | pmo-todo-followup 执行时提示用户手动分配 |
 | `.draft/` | 用户取消的解析草稿 | pmo-meeting-process 执行同文件时提示恢复 |
+
+**`.pending_backfill/` 重试耗尽后的人工介入出口：**
+
+三次自动重试均失败时，提示：
+```
+❌ 会议索引产出待办回填失败（已重试 3 次）
+  会议：{会议主题} · {会议日期}
+  meeting_record_id：{meeting_record_id}
+  关联待办：{N} 条（record_id 列表见文件）
+
+→ 如需手动修复，请在 Base 中打开该会议记录并填入"产出待办"字段：
+  {baseUrl}/table/{meetingIndex表ID}/record/{meeting_record_id}
+→ 修复后运行以下命令清除待处理记录：
+  rm ~/.smart-pmo/.pending_backfill/{project_id}.json
+```
+
+**`.pending_orphan_meeting/` 孤立会议记录修复：**
+
+pmo-meeting-process 步骤②成功写入会议索引、但步骤③待办写入全部失败时，将孤立记录保存到：
+
+```
+~/.smart-pmo/.pending_orphan_meeting/{project_id}.json
+{
+  "meeting_record_id": "rec_xxx",
+  "meeting_topic": "会议主题",
+  "meeting_date": "2026-06-12",
+  "original_todos": [...],   // 原始提取的待办内容（未写入 Base）
+  "failed_at": "2026-06-12T10:00:00"
+}
+```
+
+任何 Skill 执行时若检测到此文件，提示：
+```
+⚠️ 发现孤立会议记录（{meeting_topic} · {meeting_date}）：会议索引已建立但待办未写入
+→ 执行以下命令补录待办并建立双向关联：
+  claude pmo-meeting-process --index-only "{meeting_topic}" "{meeting_date}"
+→ 或跳过（直接回车），该提示下次执行时继续显示
+```
 
 **待处理队列过期清理规则：**
 
 | 目录 | 过期阈值 | 过期处理方式 |
 |------|---------|------------|
 | `.pending_backfill/` | 30 天 | 提示"存在 30 天前的未完成回填记录，可能已失效，是否清除？[y/N]" |
+| `.pending_orphan_meeting/` | 30 天 | 提示"存在 30 天前的孤立会议记录，是否清除？[y/N]" |
 | `.pending_assignee/` | 30 天 | 提示"存在 30 天前的待分配负责人记录，可能已过期，是否清除？[y/N]" |
 | `.draft/` | 7 天 | 提示"检测到过期草稿（{date}），是否删除？[y/N]" |
 
