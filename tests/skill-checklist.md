@@ -107,17 +107,26 @@
 ## pmo-milestone
 
 ### Happy Path
-- [ ] `claude pmo-milestone` — 显示所有里程碑（含行序号）
-- [ ] `claude pmo-milestone --check` — 显示到期检查结果
+- [ ] `claude pmo-milestone` — 显示所有里程碑（含行序号），已完成分组默认折叠
+- [ ] `claude pmo-milestone --all` — 显示全部里程碑（含所有已完成）
+- [ ] `claude pmo-milestone --check` — 显示到期检查结果（过期 + 即将到期）
 - [ ] `claude pmo-milestone --add "test" --due 2026-12-31 --owner @张三` — 新增
-- [ ] `claude pmo-milestone --complete MILE-001` — 用 MILE-ID 标记完成
+- [ ] `claude pmo-milestone --add "test" --due 2026-12-31 --owner @张三 --progress 30 --status 进行中 --desc "说明"` — 新增（完整参数）
+- [ ] `claude pmo-milestone --complete MILE-001` — 用 MILE-ID 标记完成，自动填写实际日期+补齐进度
 - [ ] `claude pmo-milestone --complete 2` — 用行序号标记完成
 - [ ] `claude pmo-milestone --modify 1 --progress 75` — 用行序号修改进度
+- [ ] `claude pmo-milestone --modify MILE-001 --status 已延期` — 修改状态
+- [ ] `claude pmo-milestone --modify 1 --desc "更新描述"` — 修改描述
 
 ### Edge Cases
-- [ ] 无里程碑 → 显示空列表
+- [ ] 无里程碑 → 显示空列表 + 新增提示
 - [ ] 新增时负责人未匹配 → 留空并提示
 - [ ] 用序号但未先查看 → 自动查看后再操作
+- [ ] 无效序号 → 提示超出范围
+- [ ] MILE-ID 不存在 → 提示并中断
+- [ ] 无效状态值 → 提示可选值并中断
+- [ ] 无效进度值 → 提示需为 0~100
+- [ ] Base 写入失败（重试耗尽）→ 提示手动处理
 
 ---
 
@@ -125,14 +134,23 @@
 
 ### Happy Path
 - [ ] `claude pmo-weekly-report` — 生成本周周报
+- [ ] `claude pmo-weekly-report --week YYYY-MM-DD` — 生成指定周周报
+- [ ] `claude pmo-weekly-report --dry-run` — 预览模式，不写入
 - [ ] `claude pmo-weekly-report --no-compare` — 不对比上周
 - [ ] `claude pmo-weekly-report --send` — 生成后推送摘要卡片到项目群
+- [ ] `claude pmo-weekly-report --send --chat-id <id>` — 推送到指定群
 - [ ] 逾期趋势等估算数据附注 `*估算` 标记
+- [ ] 确认界面支持「修改」反馈循环
 
 ### Edge Cases
-- [ ] 本周无会议 → 正常生成，会议部分显示"无"
-- [ ] 已生成过本周周报 → 询问是否覆盖
+- [ ] 本周无会议 → 正常生成，会议部分显示「本周无会议记录」
+- [ ] 本周无新增/完成待办 → 显示 0，不影响生成
+- [ ] 无上周数据 → 显示「首次生成，暂无上周数据」
+- [ ] 已生成过本周周报 → 检测重复，询问是否继续
 - [ ] `--send` 推送失败 → 提示 ⚠️ 但周报已归档
+- [ ] Base 查询超时 → 对应指标显示 `-`，不阻塞
+- [ ] Wiki 归档失败（重试耗尽）→ 提示手动归档
+- [ ] wikiNodeTokens 缺少 02-周报 → 提示配置问题
 
 ---
 
@@ -149,17 +167,42 @@
 
 ---
 
+## pmo-pin / pmo-unpin
+
+### Happy Path
+- [ ] `claude pmo-pin <项目名>` — 关注单个项目
+- [ ] `claude pmo-pin <项目1> <项目2>` — 批量关注
+- [ ] `claude pmo-unpin <项目名>` — 取消关注
+- [ ] `claude pmo-unpin <项目1> <项目2>` — 批量取消关注
+- [ ] 无参数 `pmo-pin` — 显示当前关注列表 + 使用提示
+- [ ] 无参数 `pmo-unpin` — 显示当前关注列表 + 使用提示
+
+### Edge Cases
+- [ ] 项目名未注册 → ⚠️ 提示未注册，跳过，其余正常
+- [ ] 重复关注 → 静默跳过，标注「已在关注列表中」
+- [ ] 取消关注未关注的项目 → 静默跳过
+- [ ] pinned 文件不存在 → 视为空列表，正常创建
+- [ ] 全部移除后为空 → 提示「pmo-dashboard 将展示所有 active 项目」
+
+---
+
 ## pmo-dashboard
 
 ### Happy Path
 - [ ] `claude pmo-dashboard` — 显示所有关注项目概览
 - [ ] 告警项正确检测并提示下钻
 - [ ] 非关注但有告警项目正确展示
+- [ ] 无告警时显示「所有项目状态正常」
+- [ ] 定时巡检提示 `/loop 30m pmo-dashboard`
 
 ### Edge Cases
 - [ ] pinned 为空 → 回退到所有 active 项目
+- [ ] 无任何项目（无 pinned 且无 active）→ 提示创建项目
 - [ ] 无告警项 → 静默结束
-- [ ] 单个项目 Base 查询失败 → 不影响其他项目
+- [ ] 单个项目 Base 查询失败 → 标注 ⚠️ 查询失败，其余正常
+- [ ] 所有项目 Base 查询失败 → 展示失败汇总 + 排查建议
+- [ ] 下钻选项 1 → 执行 pmo-todo-followup --all --overdue
+- [ ] 下钻选项 2 → 切换到最严重项目 + pmo-todo-followup --overdue
 
 ---
 
