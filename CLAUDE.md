@@ -1,7 +1,7 @@
 # Smart-PMO 项目手册
 
 > 基于 Claude Code + 飞书 CLI 的项目管理工具集
-> 项目版本：见根目录 `VERSION` 文件（当前 v1.4.0）
+> 项目版本：见根目录 `VERSION` 文件（当前 v1.4.1）
 
 ---
 
