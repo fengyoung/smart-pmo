@@ -1,6 +1,6 @@
 ---
 name: pmo-notify
-version: 1.0.0
+version: 1.5.0
 description: "主动提醒：自动检查过期待办和即将到期里程碑，向项目群推送提醒卡片。支持 --dry-run 预览，支持 --project 指定项目。"
 metadata:
   requires:
@@ -38,6 +38,12 @@ claude pmo-notify --milestone-only        # 仅里程碑提醒
 
 - 当前项目或 `--project` 指定的项目已在 Base 中配置
 - 项目配置中有 `larkResources.chatIds`（至少一个群）
+
+**公共模式引用：**
+- 📋 待处理队列检查详见 [`_shared/pending-queue-check.md`](../_shared/pending-queue-check.md)
+- ⏱️ Base 查询超时遵循公共配置：单次 20s，并发 30s（见 CLAUDE.md）
+- 🔍 配置加载时执行 schemaVersion 检查和配置完整性校验（见 CLAUDE.md）
+- 🔄 lark-im 推送失败遵循公共错误重试策略（1s/3s/5s 退避）
 
 ## 执行流程
 

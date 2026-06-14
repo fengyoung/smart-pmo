@@ -1,7 +1,7 @@
 # Smart-PMO 项目手册
 
 > 基于 Claude Code + 飞书 CLI 的项目管理工具集
-> 项目版本：见根目录 `VERSION` 文件（当前 v1.5.0）
+> 项目版本：见根目录 `VERSION` 文件（当前 v1.5.1）
 
 ---
 
@@ -10,6 +10,7 @@
 - **`VERSION`** 文件为项目唯一版本源，所有版本号需与此文件保持一致
 - `使用手册.md` 的版本标注、`designs/config-schema.md` 的 `schemaVersion` 跟随 VERSION 同步更新
 - 各 Skill 独立维护自身版本号（在各自 SKILL.md frontmatter 中），但依赖的公共约定（如配置结构）应与 VERSION 兼容
+- **Skill 版本号约定**：新 Skill 首次交付时版本号与项目 VERSION 对齐（如 v1.5.0 交付的 Skill 初始版本为 1.5.0）；后续根据自身实际变更频次独立演进（如 1.5.0 → 1.5.1 → 1.6.0）
 
 ---
 
@@ -32,6 +33,12 @@ smart-pmo/
 ├── CLAUDE.md                           # 本文件 — 项目手册
 ├── REQUIREMENTS.md                     # 完整需求清单
 ├── README.md                           # 项目概述与快速开始
+
+├── .agents/                             # Claude Code Skill 定义
+│   └── skills/
+│       ├── _shared/                      # 公共模块（日期计算、待处理队列检查等）
+│       ├── pmo-*/                        # 各 Skill 目录
+│       └── ...
 
 ├── designs/                            # 架构级设计文档
 │   ├── base-tables.md                  # 多维表格 Base 3 张表的字段设计
@@ -285,7 +292,9 @@ baseUrl = https://bytedance.larkoffice.com/base/{config.larkResources.baseAppTok
 
 ### 公共：待处理队列（所有 Skill 统一遵循）
 
-所有 `pmo-*` Skill 执行时先检查以下四个目录：
+> 📋 详见 [`_shared/pending-queue-check.md`](.agents/skills/_shared/pending-queue-check.md)。包含四个待处理目录的定义、过期清理规则、以及引用方式。
+
+**所有 Skill 执行时先检查以下四个目录**（详见共享模块）：
 
 | 目录 | 用途 | 处理方式 |
 |------|------|---------|
@@ -293,65 +302,6 @@ baseUrl = https://bytedance.larkoffice.com/base/{config.larkResources.baseAppTok
 | `.pending_orphan_meeting/` | 会议索引已写入但待办写入失败（孤立会议记录）| 提示用户，建议 `--index-only` 补录待办 |
 | `.pending_assignee/` | 负责人 API 写入失败 | pmo-todo-followup 执行时提示用户手动分配 |
 | `.draft/` | 用户取消的解析草稿 | pmo-meeting-process 执行同文件时提示恢复 |
-
-**`.pending_backfill/` 重试耗尽后的人工介入出口：**
-
-三次自动重试均失败时，提示：
-```
-❌ 会议索引产出待办回填失败（已重试 3 次）
-  会议：{会议主题} · {会议日期}
-  meeting_record_id：{meeting_record_id}
-  关联待办：{N} 条（record_id 列表见文件）
-
-→ 如需手动修复，请在 Base 中打开该会议记录并填入"产出待办"字段：
-  {baseUrl}/table/{meetingIndex表ID}/record/{meeting_record_id}
-→ 修复完成后，由执行 Skill 的 AI 读取并删除对应 pending_backfill 文件，或提示用户确认删除
-```
-
-> ⚠️ 不在提示中输出原始 `rm` 命令。Skill 检测到用户确认修复完成时，由 AI 直接删除 `~/.smart-pmo/.pending_backfill/{实际项目ID}.json`，并输出确认信息。
-
-**`.pending_orphan_meeting/` 孤立会议记录修复：**
-
-pmo-meeting-process 步骤②成功写入会议索引、但步骤③待办写入全部失败时，将孤立记录**追加**到：
-
-```
-~/.smart-pmo/.pending_orphan_meeting/{project_id}.json
-{
-  "orphans": [
-    {
-      "meeting_record_id": "rec_xxx",
-      "meeting_topic": "会议主题",
-      "meeting_date": "2026-06-12",
-      "original_todos": [...],   // 原始提取的待办内容（未写入 Base）
-      "failed_at": "2026-06-12T10:00:00"
-    },
-    ...  // 同一项目多次失败时追加，不覆盖
-  ]
-}
-```
-
-> ⚠️ 写入时必须先读取文件（若已存在），在 `orphans` 数组中追加新条目，而非覆盖整个文件。
-
-任何 Skill 执行时若检测到此文件，展示所有未处理的孤立记录并提示：
-```
-⚠️ 发现 {N} 条孤立会议记录（待办写入失败），会议索引已建立：
-  1. {meeting_topic} · {meeting_date}
-  2. ...
-→ 执行以下命令逐一补录待办并建立双向关联：
-  claude pmo-meeting-process --index-only "{meeting_topic}" "{meeting_date}"
-→ 或跳过（直接回车），该提示下次执行时继续显示
-```
-
-**待处理队列过期清理规则：**
-
-| 目录 | 过期阈值 | 过期处理方式 |
-|------|---------|------------|
-| `.pending_backfill/` | 30 天 | 提示"存在 30 天前的未完成回填记录，可能已失效，是否清除？[y/N]" |
-| `.pending_orphan_meeting/` | 30 天 | 提示"存在 30 天前的孤立会议记录，是否清除？[y/N]" |
-| `.pending_assignee/` | 30 天 | 提示"存在 30 天前的待分配负责人记录，可能已过期，是否清除？[y/N]" |
-| `.draft/` | 7 天 | 提示"检测到过期草稿（{date}），是否删除？[y/N]" |
-
-检查逻辑：读取文件中的 `failed_at` / `cached_at` 字段，与 `currentDate` 比较。文件缺少时间戳则按文件 mtime 计算。过期记录不自动删除，需用户确认。
 
 ### 公共：Base 写入负责人字段格式（所有 Skill 统一遵循）
 
@@ -365,18 +315,7 @@ pmo-meeting-process 步骤②成功写入会议索引、但步骤③待办写入
 
 ### 公共：日期计算（所有 Skill 统一遵循）
 
-模糊时间表达基于当前日期（`currentDate` = 系统上下文中注入的今日日期）动态计算：
-
-| 表达 | 计算规则 |
-|------|---------|
-| 今天 | currentDate |
-| 明天 | currentDate + 1天 |
-| 尽快 / ASAP | currentDate + 3天 |
-| 这周五 | 本周五；若今日已是周五则取下周五 |
-| 下周X | 下一周的星期X |
-| 月底 | 当月最后一天 |
-| 下个月底 | 下月最后一天 |
-| 未提及 | 留空，确认界面标注 ⚠️ 截止时间未指定 |
+> 📅 详见 [`_shared/date-calc-rules.md`](.agents/skills/_shared/date-calc-rules.md)。包含模糊时间表达计算规则和优先级推断规则。
 
 ---
 
@@ -392,4 +331,5 @@ pmo-meeting-process 步骤②成功写入会议索引、但步骤③待办写入
 | **阶段二（P1）** | pmo-milestone + pmo-weekly-report + pmo-dashboard/pmo-pin/pmo-unpin | ✅ 已完成 |
 | **阶段三（P2）** | pmo-search + pmo-export + pmo-today + pmo-info 全面升级 | ✅ 已完成 |
 | **阶段四（v1.5.0）** | pmo-risk-scan + pmo-notify + pmo-stats + pmo-import + pmo-meeting-prep 新增；共享模块提取；文档一致性修复 | ✅ 已完成 |
+| **v1.5.1 优化** | 全面审查与优化（P0-P3）：消除三重重复、统一共享模块引用、补齐 5 个 P2 Skill 公共模式引用、修复 depends_on 声明、文档同步、测试 checklist 全覆盖 | ✅ 已完成 |
 | **阶段五（P3规划）** | pmo-burn-down + pmo-changelog + pmo-retro（SKILL.md stub 已就绪） | 📋 规划中 |

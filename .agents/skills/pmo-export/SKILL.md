@@ -46,6 +46,7 @@ claude pmo-export --output ~/Desktop/pmo-export
 | 目录 | 用途 | 处理方式 |
 |------|------|---------|
 | `~/.smart-pmo/.pending_backfill/` | 会议索引回填失败 | 自动重试回填，成功删文件 |
+| `~/.smart-pmo/.pending_orphan_meeting/` | 孤立会议记录（步骤②成功+步骤③全部失败）| 提示用户执行 `--index-only` 补录 |
 | `~/.smart-pmo/.pending_assignee/` | 负责人 API 写入失败 | 提示用户存在待分配记录 |
 | `~/.smart-pmo/.draft/` | 用户取消的解析草稿 | 提示用户存在缓存草稿 |
 
@@ -130,6 +131,15 @@ output  = --output 参数（默认 ./{project_id}_{YYYYMMDD}/）
    └── export_meta.json
 
 提示：使用 Excel 打开 CSV 时，选择「数据 → 从文本/CSV 导入」，文件编码选择 UTF-8
+```
+
+## 快速操作
+
+```
+pmo-search "关键词"                      搜索导出的内容
+pmo-stats --export stats.md              导出统计分析报告
+pmo-info                                 查看项目概况
+pmo-archive --file <导出文件>            归档导出文件到知识库
 ```
 
 ## 异常处理

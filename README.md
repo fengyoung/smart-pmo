@@ -132,4 +132,6 @@ claude pmo-use <项目名>
 | **阶段一（P0）** | pmo-init + pmo-meeting-process + pmo-todo-from-chat + pmo-todo-followup + pmo-archive + pmo-use/pmo-list | ✅ 已完成 |
 | **阶段二（P1）** | pmo-milestone + pmo-weekly-report + pmo-dashboard + pmo-pin/pmo-unpin | ✅ 已完成 |
 | **阶段三（P2）** | pmo-search + pmo-export + pmo-today + pmo-info + 持续完善 | ✅ 已完成 |
-| **阶段四（P1-P3）** | pmo-risk-scan + pmo-notify + pmo-stats + pmo-import + pmo-meeting-prep + pmo-burn-down + pmo-changelog + pmo-retro | ✅ 已完成（P3 三项目前为规划态）|
+| **阶段四（v1.5.0）** | pmo-risk-scan + pmo-notify + pmo-stats + pmo-import + pmo-meeting-prep 新增；共享模块提取；文档一致性修复 | ✅ 已完成 |
+| **v1.5.1 优化** | 全面审查与优化：消除重复、统一共享模块、修复 depends_on、补齐公共模式引用、文档/测试同步 | ✅ 已完成 |
+| **阶段五（P3规划）** | pmo-burn-down + pmo-changelog + pmo-retro（SKILL.md stub 已就绪）| 📋 规划中 |

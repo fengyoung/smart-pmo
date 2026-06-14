@@ -102,6 +102,14 @@
   },
   "larkResources": {
     "wikiSpaceId": "ss_abc123",
+    "wikiNodeTokens": {
+      "01-会议纪要": "wik_node_001",
+      "02-周报": "wik_node_002",
+      "03-需求文档": "wik_node_003",
+      "04-设计文档": "wik_node_004",
+      "05-项目资料": "wik_node_005",
+      "99-归档": "wik_node_006"
+    },
     "baseAppToken": "bas_abc123",
     "baseTableIds": {
       "todos": "tbl_todo_001",

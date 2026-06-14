@@ -7,7 +7,6 @@ metadata:
     bins: []
   depends_on:
     - lark-base
-    - lark-im
     - lark-contact
 ---
 

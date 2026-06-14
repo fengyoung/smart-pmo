@@ -162,6 +162,6 @@ claude pmo-todo-followup --all --modify TODO-003 --due 2026-06-20 --project XRay
 1. 通过 `lark-base update_record` 更新指定字段：
    - `--assign @姓名`：解析姓名为 openId（走成员名称解析逻辑）
    - `--due YYYY-MM-DD`：修改截止日期
-   - `--priority P0/P1/P2/P3`：修改优先级
-   - `--status 状态值`：修改状态
+   - `--priority P0/P1/P2/P3`：修改优先级（仅接受 P0/P1/P2/P3，无效值提示并中断）
+   - `--status 状态值`：修改状态（仅接受 待处理/进行中/已完成/已取消，无效值提示并中断）
 2. 输出确认

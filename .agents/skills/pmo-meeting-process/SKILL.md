@@ -134,15 +134,12 @@ config = get_current_project_config()
 | "YY要在DDL前完成" | "周五前要完成方案评审" | 截止日期=本周五 |
 | "交给XX" | "这个交给王五处理" | 负责人=王五 |
 
-对于未明确的截止时间，基于当前日期（`currentDate`）动态计算：
-- "尽快" / "ASAP" → currentDate + 3天
-- "今天" → currentDate
-- "明天" → currentDate + 1天
-- "这周五" → 本周五日期（若今天已是周五则为下周五）
-- "下周X" → 下一周对应的星期X
-- "月底" → 当月最后一天
-- "下个月底" → 下月最后一天
-- 未提及 → **截止日期留空**，确认界面标注 ⚠️ 截止日期待确认
+> 📅 截止时间计算规则详见 [`_shared/date-calc-rules.md`](_shared/date-calc-rules.md)：
+> - "尽快" / "ASAP" → currentDate + 3天
+> - "今天" → currentDate、"明天" → currentDate + 1天
+> - "这周五" → 本周五（若今天已是周五则为下周五）
+> - "下周X" → 下一周对应的星期X、"月底" → 当月最后一天
+> - 未提及 → **截止日期留空**，确认界面标注 ⚠️ 截止日期待确认
 
 **成员名称解析（负责人字段）— 必须在展示确认前完成：**
 
@@ -349,41 +346,4 @@ claude pmo-meeting-process --index-only "<会议主题>" "<会议日期>"
 
 ### 断点续传与待处理队列
 
-所有 `pmo-*` Skill 执行时，先检查以下四个目录是否有待处理项：
-
-**1. .pending_backfill/ — 会议索引回填失败（步骤④）**
-
-步骤④失败时写入，三次自动重试后仍失败时展示具体操作引导（见 CLAUDE.md「重试耗尽后的人工介入出口」）。
-
-**2. .pending_orphan_meeting/ — 孤立会议记录（步骤②成功+步骤③全部失败）**
-
-写入时**追加**到 `orphans` 数组，不覆盖——同一项目可能有多次孤立记录：
-
-```
-~/.smart-pmo/.pending_orphan_meeting/{project_id}.json
-{
-  "orphans": [
-    {
-      "meeting_record_id": "rec_xxx",
-      "meeting_topic": "Sprint评审",
-      "meeting_date": "2026-06-12",
-      "original_todos": [
-        {"content": "接口联调", "assignee": "李四", "due": "2026-06-15"},
-        ...
-      ],
-      "failed_at": "2026-06-12T10:00:00"
-    }
-  ]
-}
-```
-
-- 检测到时提示：`⚠️ 发现 {N} 条孤立会议记录（最新：{meeting_topic}·{meeting_date}）`
-- 操作引导：`claude pmo-meeting-process --index-only "{meeting_topic}" "{meeting_date}"`（对每条逐一补录）
-
-**3. .pending_assignee/ — 负责人写入失败**
-
-负责人字段 API 写入失败时写入，`pmo-todo-followup` 执行时提示用户手动分配（附 Base 记录链接）。
-
-**4. .draft/ — 用户取消的解析草稿**
-
-用户选择「取消」时缓存解析结果（格式见上方草稿缓存机制）。
+> 📋 详见 [`_shared/pending-queue-check.md`](../_shared/pending-queue-check.md)。检查 `.pending_backfill/`、`.pending_orphan_meeting/`、`.pending_assignee/`、`.draft/` 四个目录。过期清理规则和操作引导见共享模块。

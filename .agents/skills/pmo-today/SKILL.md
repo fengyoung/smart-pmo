@@ -34,6 +34,7 @@ claude pmo-today --all
 | 目录 | 用途 | 处理方式 |
 |------|------|---------|
 | `~/.smart-pmo/.pending_backfill/` | 会议索引回填失败 | 自动重试回填，成功删文件 |
+| `~/.smart-pmo/.pending_orphan_meeting/` | 孤立会议记录（步骤②成功+步骤③全部失败）| 提示用户执行 `--index-only` 补录 |
 | `~/.smart-pmo/.pending_assignee/` | 负责人 API 写入失败 | 提示用户存在待分配记录 |
 | `~/.smart-pmo/.draft/` | 用户取消的解析草稿 | 提示用户存在缓存草稿 |
 

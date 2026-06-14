@@ -1,6 +1,6 @@
 ---
 name: pmo-risk-scan
-version: 1.0.0
+version: 1.5.0
 description: "项目风险扫描：自动检测所有关注项目的风险信号（过期待办占比、会议断层、里程碑延期、待办长期无更新），输出风险等级和详细告警。"
 metadata:
   requires:
@@ -32,6 +32,11 @@ claude pmo-risk-scan --send
 ## 前置条件
 
 无。`--project` 模式不需要设置当前项目；默认模式需至少有关注项目或 active 项目。
+
+**公共模式引用：**
+- 📋 待处理队列检查详见 [`_shared/pending-queue-check.md`](../_shared/pending-queue-check.md)
+- ⏱️ Base 查询超时遵循公共配置：单次 20s，并发 30s（见 CLAUDE.md）
+- 🔍 配置加载时执行 schemaVersion 检查和配置完整性校验（见 CLAUDE.md）
 
 ## 执行流程
 

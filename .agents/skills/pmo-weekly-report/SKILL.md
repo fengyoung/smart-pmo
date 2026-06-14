@@ -246,6 +246,16 @@ claude pmo-weekly-report --dry-run
 使用 pmo-weekly-report --send 生成并推送
 ```
 
+## 快速操作
+
+```
+pmo-todo-followup --overdue               跟进过期待办
+pmo-milestone --check                      检查里程碑到期情况
+pmo-search "关键词"                        搜索相关内容
+pmo-stats --weeks 8                        查看近 8 周趋势
+pmo-archive --file <本周文件路径>          归档相关文件到知识库
+```
+
 ## 异常处理
 
 | 场景 | 处理方式 |

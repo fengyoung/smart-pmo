@@ -1,6 +1,6 @@
 ---
 name: pmo-meeting-prep
-version: 1.0.0
+version: 1.5.0
 description: "会前准备：自动拉取上次会议未完成待办、临近到期里程碑、长期无进展待办，生成议程文档并可选推送到项目群。帮助会议主持人高效准备。"
 metadata:
   requires:
@@ -38,6 +38,13 @@ claude pmo-meeting-prep --topic "Sprint 评审 + 风险盘点"
 ## 前置条件
 
 已通过 `pmo-use` 设置当前项目。
+
+**公共模式引用：**
+- 📋 待处理队列检查详见 [`_shared/pending-queue-check.md`](../_shared/pending-queue-check.md)
+- ⏱️ Base 查询超时遵循公共配置：单次 20s，并发 30s（见 CLAUDE.md）
+- 🔄 Wiki/IM 写操作失败遵循公共错误重试策略（1s/3s/5s 退避）
+- 🔍 配置加载时执行 schemaVersion 检查和配置完整性校验（见 CLAUDE.md）
+- 📅 日期计算规则详见 [`_shared/date-calc-rules.md`](../_shared/date-calc-rules.md)
 
 ## 执行流程
 
@@ -98,6 +105,7 @@ claude pmo-meeting-prep --topic "Sprint 评审 + 风险盘点"
 1. 通过 `lark-doc` 创建飞书文档
 2. 归档到知识库 `01-会议纪要/`（文件名：`{YYYYMMDD}-{会议主题}-议程`）
 3. 若指定 `--send`：推送议程卡片到项目群
+4. **追溯性**：将议程文档链接写入 Base「会议记录索引」表中（若已有对应会议记录则更新「纪要文档链接」字段；若无则创建一条新记录，会议主题后加"（议程）"标注，状态与正式会议纪要区分）
 
 **推送卡片：**
 ```

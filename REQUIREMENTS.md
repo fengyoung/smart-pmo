@@ -379,6 +379,15 @@ Smart-PMO 是一套基于 **Claude Code Skill 系统 + 飞书 CLI** 的项目管
 | `pmo-archive` | 文档归档 | P0 | `claude pmo-archive --file <path> --dir <dir>` |
 | `pmo-milestone` | 里程碑管理 | P1 | `claude pmo-milestone --check` |
 | `pmo-weekly-report` | 周报生成 | P1 | `claude pmo-weekly-report` |
+| `pmo-search` | 跨表跨项目搜索 | P2 | `claude pmo-search <关键词>` |
+| `pmo-export` | 数据导出 CSV/JSON | P2 | `claude pmo-export` |
+| `pmo-today` | 今日概览 | P2 | `claude pmo-today` |
+| `pmo-info` | 项目详情与诊断 | P2 | `claude pmo-info` |
+| `pmo-risk-scan` | 项目风险扫描 | P2 | `claude pmo-risk-scan` |
+| `pmo-notify` | 待办/里程碑提醒推送 | P2 | `claude pmo-notify --all` |
+| `pmo-stats` | 项目统计分析 | P2 | `claude pmo-stats` |
+| `pmo-import` | 文件批量导入待办 | P2 | `claude pmo-import --file <path>` |
+| `pmo-meeting-prep` | 会前准备议程生成 | P2 | `claude pmo-meeting-prep` |
 
 ---
 
@@ -389,6 +398,9 @@ Smart-PMO 是一套基于 **Claude Code Skill 系统 + 飞书 CLI** 的项目管
 | **阶段一（P0）** | pmo-init + pmo-meeting-process + pmo-todo-from-chat + pmo-todo-followup + pmo-archive + pmo-use/pmo-list | 核心闭环可用 | ✅ 已完成 |
 | **阶段二（P1）** | pmo-milestone + pmo-weekly-report + pmo-dashboard/pmo-pin/pmo-unpin | 管理维度完整 | ✅ 已完成 |
 | **阶段三（P2）** | pmo-search + pmo-export + pmo-today + pmo-info 全面升级 + 持续完善 | 检索增强 + 工具链完整 | ✅ 已完成 |
+| **阶段四（v1.5.0）** | pmo-risk-scan + pmo-notify + pmo-stats + pmo-import + pmo-meeting-prep 新增；共享模块提取；文档一致性修复 | 风险管理 + 主动通知 + 数据导入 | ✅ 已完成 |
+| **v1.5.1 优化** | 全面审查与优化（P0-P3）：消除三重重复、统一共享模块引用、补齐公共模式引用、修复 depends_on、文档/测试同步 | 维护性优化 | ✅ 已完成 |
+| **阶段五（P3规划）** | pmo-burn-down + pmo-changelog + pmo-retro（SKILL.md stub 已就绪） | 燃尽图 + 变更日志 + 回顾 | 📋 规划中 |
 
 ---
 

@@ -1,6 +1,6 @@
 ---
 name: pmo-import
-version: 1.0.0
+version: 1.5.0
 description: "批量导入：从 CSV 或 Excel 文件批量导入待办事项和里程碑到 Base。支持字段映射、去重检查、预览确认。单次最多 200 条。"
 metadata:
   requires:
@@ -35,6 +35,13 @@ claude pmo-import --file <路径> --table todos --force
 ## 前置条件
 
 已通过 `pmo-use` 设置当前项目。
+
+**公共模式引用：**
+- 📋 待处理队列检查详见 [`_shared/pending-queue-check.md`](../_shared/pending-queue-check.md)
+- ⏱️ Base 操作超时遵循公共配置（见 CLAUDE.md）
+- 🔄 Base 写入失败遵循公共错误重试策略：3 次指数退避（1s/3s/5s）
+- 🔍 配置加载时执行 schemaVersion 检查和配置完整性校验（见 CLAUDE.md）
+- 👤 负责人字段写入格式遵循公共规范（见 CLAUDE.md「公共：Base 写入负责人字段格式」）
 
 ## 支持的文件格式
 

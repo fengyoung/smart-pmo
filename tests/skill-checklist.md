@@ -1,7 +1,7 @@
 # Smart-PMO Skill 测试 Checklist
 
 > 用于每次修改 Skill 后进行回归测试
-> 最后更新：2026-06-11
+> 最后更新：2026-06-14
 
 ---
 
@@ -286,6 +286,117 @@
 - [ ] 项目名已注册且完整 → 提示已初始化
 - [ ] 项目名已注册但不完整 → 断点恢复
 - [ ] --from 源项目不存在 → 退回到交互式
+
+---
+
+## pmo-risk-scan
+
+### Happy Path
+- [ ] `claude pmo-risk-scan` — 扫描所有关注项目，显示风险等级
+- [ ] `claude pmo-risk-scan --project XRay` — 扫描指定项目
+- [ ] `claude pmo-risk-scan --high-only` — 仅显示高风险项目
+- [ ] `claude pmo-risk-scan --send` — 推送风险报告到项目群
+- [ ] 6 项指标正确计算并评级（🟢/🟡/🔴）
+
+### Edge Cases
+- [ ] 无关注项目且无 active 项目 → 提示空列表
+- [ ] 新项目（<7天）→ 使用宽松阈值
+- [ ] 单个项目 Base 查询失败 → 跳过该项目，标注 ⚠️
+- [ ] 所有项目 Base 查询失败 → 展示失败汇总 + 排查建议
+- [ ] 缺少会议记录 → 会议断层指标默认为 🟡
+- [ ] 已归档项目 → 默认排除，--all 时包含
+
+---
+
+## pmo-notify
+
+### Happy Path
+- [ ] `claude pmo-notify` — 向当前项目群推送提醒
+- [ ] `claude pmo-notify --dry-run` — 预览模式，不实际推送
+- [ ] `claude pmo-notify --project XRay` — 向指定项目推送
+- [ ] `claude pmo-notify --all` — 向所有关注项目推送
+- [ ] `claude pmo-notify --overdue-only` — 仅过期待办提醒
+- [ ] `claude pmo-notify --milestone-only` — 仅里程碑提醒
+- [ ] 推送间隔 >= 30 分钟 → 正常推送
+- [ ] 推送间隔 < 30 分钟 → 提示跳过
+
+### Edge Cases
+- [ ] 无需要提醒项 → 静默结束，不推送空消息
+- [ ] 项目无 chatIds → 降级为终端输出 + 提示配置群聊
+- [ ] IM 推送失败 → 提示 ⚠️ 但继续
+- [ ] Base 查询失败 → 对应项目 ⚠️，其余正常
+- [ ] pinned 为空 → 回退到所有 active 项目
+
+---
+
+## pmo-stats
+
+### Happy Path
+- [ ] `claude pmo-stats` — 当前项目近 4 周统计
+- [ ] `claude pmo-stats --weeks 8` — 指定周期数
+- [ ] `claude pmo-stats --monthly --months 3` — 按月统计
+- [ ] `claude pmo-stats --project XRay` — 指定项目
+- [ ] `claude pmo-stats --all` — 跨所有关注项目汇总
+- [ ] `claude pmo-stats --export stats-report.md` — 导出报告
+- [ ] ASCII 趋势图正确显示
+- [ ] 负责人贡献分布正确
+
+### Edge Cases
+- [ ] 数据不足 2 周 → 提示数据不足，建议等待
+- [ ] 新项目（<7天）→ 友好提示等待 2 周
+- [ ] 缺少完成时间字段 → 标注 `*估算`
+- [ ] 负责人字段为空 → 归类为「未分配」
+- [ ] 零积压 → 显示庆祝信息
+- [ ] --all 模式单项目失败 → 跳过，其余正常
+
+---
+
+## pmo-import
+
+### Happy Path
+- [ ] `claude pmo-import --file test.csv --table todos` — 交互式字段映射导入
+- [ ] `claude pmo-import --file test.xlsx --table todos --auto-map` — 自动映射
+- [ ] `claude pmo-import --file test.csv --table todos --dry-run` — 预览不写入
+- [ ] `claude pmo-import --file test.csv --table todos --force` — 跳过重复检查
+- [ ] CSV/UTF-8 正确解析
+- [ ] XLSX 正确解析
+- [ ] Markdown 表格正确解析
+- [ ] 去重检查正确（85% 语义相似度）
+
+### Edge Cases
+- [ ] 文件不存在 → 提示检查路径
+- [ ] 文件 >10MB → 提示过大
+- [ ] 编码检测（UTF-8/GBK fallback）
+- [ ] 空行/无效行 → 跳过并报告
+- [ ] 日期格式自动检测（多种格式）
+- [ ] 字段映射：中文/英文模糊匹配
+- [ ] 单批 >200 条 → 自动降级（200→100→50）
+- [ ] Base 错误码 1254104 → 自动减半批次重试
+- [ ] 负责人未匹配 → 留空 + 警告
+- [ ] 预览后 4 选项：全部写入/跳过重复/逐条确认/取消
+
+---
+
+## pmo-meeting-prep
+
+### Happy Path
+- [ ] `claude pmo-meeting-prep` — 生成会前议程文档
+- [ ] `claude pmo-meeting-prep --date 2026-06-16` — 指定会议日期
+- [ ] `claude pmo-meeting-prep --dry-run` — 预览不归档
+- [ ] `claude pmo-meeting-prep --send` — 生成并推送
+- [ ] `claude pmo-meeting-prep --topic "Sprint评审"` — 自定义主题
+- [ ] 议程包含上次会议未完成待办列表
+- [ ] 议程包含临近到期里程碑
+- [ ] 议程包含长期无进展待办
+
+### Edge Cases
+- [ ] 无历史会议 → 首次会议模式，基于当前数据生成
+- [ ] 上次会议无未完成待办 → 正常，该项显示无
+- [ ] 无临近到期里程碑 → 跳过里程碑部分
+- [ ] 距上次会议 >30 天 → 警告间隔过长
+- [ ] Base 查询失败 → 生成框架文档，标注 `*无法获取`
+- [ ] IM 推送失败 → 文档已归档，仅推送失败
+- [ ] Wiki 归档失败（重试耗尽）→ 提示手动归档
 
 ---
 

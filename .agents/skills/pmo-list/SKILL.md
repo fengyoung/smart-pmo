@@ -22,6 +22,9 @@ claude pmo-list --active
 
 # 仅列出配置信息（不查询 Base，快速模式）
 claude pmo-list --config-only
+
+# JSON 格式输出（适用于脚本/管道消费）
+claude pmo-list --json
 ```
 
 ## 执行流程
