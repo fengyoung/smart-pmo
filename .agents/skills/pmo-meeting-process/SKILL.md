@@ -323,22 +323,28 @@ claude pmo-meeting-process --index-only "<会议主题>" "<会议日期>"
 
 **2. .pending_orphan_meeting/ — 孤立会议记录（步骤②成功+步骤③全部失败）**
 
+写入时**追加**到 `orphans` 数组，不覆盖——同一项目可能有多次孤立记录：
+
 ```
 ~/.smart-pmo/.pending_orphan_meeting/{project_id}.json
 {
-  "meeting_record_id": "rec_xxx",
-  "meeting_topic": "Sprint评审",
-  "meeting_date": "2026-06-12",
-  "original_todos": [
-    {"content": "接口联调", "assignee": "李四", "due": "2026-06-15"},
-    ...
-  ],
-  "failed_at": "2026-06-12T10:00:00"
+  "orphans": [
+    {
+      "meeting_record_id": "rec_xxx",
+      "meeting_topic": "Sprint评审",
+      "meeting_date": "2026-06-12",
+      "original_todos": [
+        {"content": "接口联调", "assignee": "李四", "due": "2026-06-15"},
+        ...
+      ],
+      "failed_at": "2026-06-12T10:00:00"
+    }
+  ]
 }
 ```
 
-- 检测到时提示：`⚠️ 发现孤立会议记录（{meeting_topic}·{meeting_date}），待办写入失败`
-- 操作引导：`claude pmo-meeting-process --index-only "{meeting_topic}" "{meeting_date}"`
+- 检测到时提示：`⚠️ 发现 {N} 条孤立会议记录（最新：{meeting_topic}·{meeting_date}）`
+- 操作引导：`claude pmo-meeting-process --index-only "{meeting_topic}" "{meeting_date}"`（对每条逐一补录）
 
 **3. .pending_assignee/ — 负责人写入失败**
 

@@ -86,9 +86,11 @@ smart-pmo/
 **当前项目确定规则：** `$SMART_PMO_CURRENT` 环境变量 > `~/.smart-pmo/current` 文件
 
 **并发写保护：** 多个终端同时运行 `pmo-use` 切换项目会导致竞态，约定如下：
-- 写入 `current` 前先创建 `current.lock` 临时文件（内容为当前进程 PID + 时间戳）
-- 若 `current.lock` 已存在且距创建时间 < 10s → 等待 2s 后重试，最多重试 3 次
-- 若 `current.lock` 存在且超过 10s（残留锁）→ 直接覆盖，不等待
+- 写入 `current` 前使用**原子创建**（exclusive create，O_EXCL 语义）尝试创建 `current.lock` 临时文件（内容为当前进程 PID + 时间戳）
+  - 原子创建：若文件已存在则失败，若不存在则创建并写入，整个操作不可分割（避免 TOCTOU）
+  - 实现示例：`open(path, 'wx')` in Python / `O_CREAT|O_EXCL` in POSIX / `--no-clobber` in shell
+- 原子创建失败（锁已存在）且距创建时间 < 15s → 等待 2s 后重试，最多重试 5 次（总等待 ≤ 10s）
+- 锁存在且超过 15s（残留锁）→ 直接覆盖，不等待
 - 写入完成后立即删除 `current.lock`
 
 ---
@@ -302,29 +304,39 @@ baseUrl = https://bytedance.larkoffice.com/base/{config.larkResources.baseAppTok
 
 → 如需手动修复，请在 Base 中打开该会议记录并填入"产出待办"字段：
   {baseUrl}/table/{meetingIndex表ID}/record/{meeting_record_id}
-→ 修复后运行以下命令清除待处理记录：
-  rm ~/.smart-pmo/.pending_backfill/{project_id}.json
+→ 修复完成后，由执行 Skill 的 AI 读取并删除对应 pending_backfill 文件，或提示用户确认删除
 ```
+
+> ⚠️ 不在提示中输出原始 `rm` 命令。Skill 检测到用户确认修复完成时，由 AI 直接删除 `~/.smart-pmo/.pending_backfill/{实际项目ID}.json`，并输出确认信息。
 
 **`.pending_orphan_meeting/` 孤立会议记录修复：**
 
-pmo-meeting-process 步骤②成功写入会议索引、但步骤③待办写入全部失败时，将孤立记录保存到：
+pmo-meeting-process 步骤②成功写入会议索引、但步骤③待办写入全部失败时，将孤立记录**追加**到：
 
 ```
 ~/.smart-pmo/.pending_orphan_meeting/{project_id}.json
 {
-  "meeting_record_id": "rec_xxx",
-  "meeting_topic": "会议主题",
-  "meeting_date": "2026-06-12",
-  "original_todos": [...],   // 原始提取的待办内容（未写入 Base）
-  "failed_at": "2026-06-12T10:00:00"
+  "orphans": [
+    {
+      "meeting_record_id": "rec_xxx",
+      "meeting_topic": "会议主题",
+      "meeting_date": "2026-06-12",
+      "original_todos": [...],   // 原始提取的待办内容（未写入 Base）
+      "failed_at": "2026-06-12T10:00:00"
+    },
+    ...  // 同一项目多次失败时追加，不覆盖
+  ]
 }
 ```
 
-任何 Skill 执行时若检测到此文件，提示：
+> ⚠️ 写入时必须先读取文件（若已存在），在 `orphans` 数组中追加新条目，而非覆盖整个文件。
+
+任何 Skill 执行时若检测到此文件，展示所有未处理的孤立记录并提示：
 ```
-⚠️ 发现孤立会议记录（{meeting_topic} · {meeting_date}）：会议索引已建立但待办未写入
-→ 执行以下命令补录待办并建立双向关联：
+⚠️ 发现 {N} 条孤立会议记录（待办写入失败），会议索引已建立：
+  1. {meeting_topic} · {meeting_date}
+  2. ...
+→ 执行以下命令逐一补录待办并建立双向关联：
   claude pmo-meeting-process --index-only "{meeting_topic}" "{meeting_date}"
 → 或跳过（直接回车），该提示下次执行时继续显示
 ```
