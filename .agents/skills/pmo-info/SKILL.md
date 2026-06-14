@@ -110,6 +110,7 @@ pmo-todo-followup --overdue    查看过期待办
 pmo-search <关键词>             搜索待办/里程碑/会议
 pmo-milestone                  查看里程碑
 pmo-milestone --check          检查到期情况
+pmo-milestone --add "名称" --due YYYY-MM-DD --owner @姓名  创建里程碑
 pmo-meeting-process --minutes  处理飞书妙记
 pmo-meeting-process --text     手动输入会议记录
 pmo-todo-from-chat             从群消息提取待办

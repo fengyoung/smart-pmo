@@ -216,6 +216,7 @@ claude pmo-weekly-report --send --chat-id <chat_id>
    **目标群规则：**
    - `--send`：推送到项目配置 `larkResources.chatIds` 的第一个群
    - `--send --chat-id <id>`：推送到指定群（不限于项目群）
+   - **推送前预览**：`--send` 时先在终端渲染卡片预览，用户确认后再推送
    - 推送失败时提示 `⚠️ 消息推送失败，周报已归档`，不阻塞主流程
 
 4. 输出确认：

@@ -34,6 +34,11 @@ Smart-PMO 是一套项目管理的 Skill 集合，通过一系列可复用的 Cl
 | `pmo-export` | Base 数据导出 | ✅ |
 | `pmo-info` | 项目详细信息 | ✅ |
 | `pmo-today` | 今日概览 | ✅ |
+| `pmo-risk-scan` | 项目风险扫描 | ✅ |
+| `pmo-notify` | 主动提醒推送 | ✅ |
+| `pmo-stats` | 统计趋势分析 | ✅ |
+| `pmo-import` | 批量导入待办/里程碑 | ✅ |
+| `pmo-meeting-prep` | 会前议程准备 | ✅ |
 
 ## 架构概览
 
@@ -118,7 +123,7 @@ claude pmo-use <项目名>
 - [Base 表设计](designs/base-tables.md) — 多维表格字段定义
 - [配置 Schema](designs/config-schema.md) — 配置文件结构
 - [Bot 配置指南](designs/bot-setup-guide.md) — 飞书智能体配置步骤（已归档）
-- [Skill 详细规格](designs/skill-specs/) — 各 Skill 执行流程
+- [使用手册](使用手册.md) — 完整使用指南
 
 ## 实施路线
 
@@ -127,3 +132,4 @@ claude pmo-use <项目名>
 | **阶段一（P0）** | pmo-init + pmo-meeting-process + pmo-todo-from-chat + pmo-todo-followup + pmo-archive + pmo-use/pmo-list | ✅ 已完成 |
 | **阶段二（P1）** | pmo-milestone + pmo-weekly-report + pmo-dashboard + pmo-pin/pmo-unpin | ✅ 已完成 |
 | **阶段三（P2）** | pmo-search + pmo-export + pmo-today + pmo-info + 持续完善 | ✅ 已完成 |
+| **阶段四（P1-P3）** | pmo-risk-scan + pmo-notify + pmo-stats + pmo-import + pmo-meeting-prep + pmo-burn-down + pmo-changelog + pmo-retro | ✅ 已完成（P3 三项目前为规划态）|

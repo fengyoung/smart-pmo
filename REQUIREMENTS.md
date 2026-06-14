@@ -107,19 +107,13 @@ Smart-PMO 是一套基于 **Claude Code Skill 系统 + 飞书 CLI** 的项目管
       "oc_xxxxxxxxxxxxxxxxxxxxxxxx"
     ]
   },
-  "archive": {
-    "directoryStructure": [
-      "01-会议纪要",
-      "02-周报",
-      "03-需求文档",
-      "04-设计文档",
-      "05-项目资料",
-      "99-归档"
-    ]
-  },
   "chat": {
-    "lastReadMessageId": "om_xxxxx",
-    "lastReadTime": "2026-06-08T18:00:00"
+    "readPositions": {
+      "oc_xxxxxxxxxxxxxxxxxxxxxxxx": {
+        "lastReadMessageId": "om_xxxxx",
+        "lastReadTime": "2026-06-08T18:00:00"
+      }
+    }
   }
 }
 ```
@@ -178,7 +172,7 @@ Smart-PMO 是一套基于 **Claude Code Skill 系统 + 飞书 CLI** 的项目管
 | `优先级` | 单选 | ✅ | `P0-紧急` / `P1-重要` / `P2-一般` / `P3-低优` |
 | `所属会议` | 关联记录 | | 关联到「会议记录索引」表 |
 | `来源` | 文本 | | 标记来源：会议/群聊/手动 |
-| `来源消息` | 文本 | | 群聊来源时记录消息 ID（去重用）|
+| `来源消息ID` | 文本 | | 群聊来源时记录消息 ID（去重用）|
 | `完成日期` | 日期 | | 标记完成时自动填入 |
 | `备注` | 文本 | | |
 | `创建时间` | 创建时间（自动） | — | |

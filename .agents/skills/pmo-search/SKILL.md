@@ -27,6 +27,9 @@ claude pmo-search <关键词> --in todos,meetings
 # 跨所有关注项目搜索
 claude pmo-search <关键词> --all
 
+# 搜索知识库文档正文（会议纪要、周报等）
+claude pmo-search <关键词> --in docs
+
 # 限定时间范围
 claude pmo-search <关键词> --since 2026-05-01
 claude pmo-search <关键词> --since 2026-05-01 --until 2026-06-01
@@ -89,6 +92,13 @@ owner     = --owner 解析后的 openId（可选）
 **会议记录索引表（meetings）：**
 - 匹配字段：会议主题、讨论要点摘要、关键决策
 - 附加过滤：--since/--until → 会议日期
+
+**知识库文档（docs，仅当 --in docs 时）：**
+- 通过 `lark-wiki` 遍历项目知识库中 `01-会议纪要/` 和 `02-周报/` 目录下的文档
+- 对每个文档通过 `lark-doc` 读取正文内容，关键词匹配
+- 返回格式：文档标题 + 匹配摘要 + Wiki 链接
+- 单目录最多搜索 20 个文档，合并结果按匹配度排序
+- 超过 3 个文档时并行读取正文（提高效率）
 
 每张表最多返回 `--limit` 指定的条数（默认 20，最大 100，按相关性/时间倒序）。
 

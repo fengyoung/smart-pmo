@@ -98,6 +98,7 @@ claude pmo-dashboard
 使用 pmo-use <项目名> 查看详情
 使用 pmo-pin <项目名>  关注更多项目
 使用 pmo-search <关键词> --all  跨项目搜索
+使用 pmo-milestone --add "里程碑名称" --due YYYY-MM-DD --owner @姓名  创建里程碑
 
 ── 其他活跃项目（未关注）──
 （仅当 pinned 不为空，且存在有告警的非关注 active 项目时展示）

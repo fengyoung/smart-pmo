@@ -22,7 +22,7 @@
 ```json
 {
   "$schema": "https://github.com/fengyoung/smart-pmo/schemas/project-config-v1.json",
-  "schemaVersion": "1.2",
+  "schemaVersion": "1.1",
 
   "project": {
     "name": "string (必填) — 项目名称",
@@ -68,8 +68,12 @@
   },
 
   "chat": {
-    "lastReadMessageId": "string (可选) — 上次群消息读取位置，初始为空",
-    "lastReadTime": "string (可选) — 格式 YYYY-MM-DDTHH:mm:ss，初始为空"
+    "readPositions": {
+      "<chat_id>": {
+        "lastReadMessageId": "string (可选) — 该群上次消息读取位置，初始为空",
+        "lastReadTime": "string (可选) — 格式 YYYY-MM-DDTHH:mm:ss，初始为空"
+      }
+    }
   }
 }
 ```
@@ -78,7 +82,7 @@
 
 ```json
 {
-  "schemaVersion": "1.2",
+  "schemaVersion": "1.1",
   "project": {
     "name": "智能客服平台",
     "alias": "ICS",
@@ -107,8 +111,12 @@
     "chatIds": ["oc_chat_001"]
   },
   "chat": {
-    "lastReadMessageId": "",
-    "lastReadTime": ""
+    "readPositions": {
+      "oc_chat_001": {
+        "lastReadMessageId": "",
+        "lastReadTime": ""
+      }
+    }
   }
 }
 ```

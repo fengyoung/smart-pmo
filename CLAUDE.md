@@ -1,7 +1,7 @@
 # Smart-PMO 项目手册
 
 > 基于 Claude Code + 飞书 CLI 的项目管理工具集
-> 项目版本：见根目录 `VERSION` 文件（当前 v1.4.1）
+> 项目版本：见根目录 `VERSION` 文件（当前 v1.5.0）
 
 ---
 
@@ -40,7 +40,8 @@ smart-pmo/
 
 ├── templates/                          # 文档模板
 │   ├── meeting-notes-template.md       # 会议纪要文档模板
-│   └── weekly-report-template.md       # 周报文档模板
+│   ├── weekly-report-template.md       # 周报文档模板
+│   └── asr-correction-table-template.md # ASR 校正表模板（参考 Iris）
 ```
 
 ---
@@ -390,3 +391,5 @@ pmo-meeting-process 步骤②成功写入会议索引、但步骤③待办写入
 | **阶段一（P0）** | pmo-init + pmo-meeting-process + pmo-todo-from-chat + pmo-todo-followup + pmo-archive + pmo-use/pmo-list | ✅ 已完成 |
 | **阶段二（P1）** | pmo-milestone + pmo-weekly-report + pmo-dashboard/pmo-pin/pmo-unpin | ✅ 已完成 |
 | **阶段三（P2）** | pmo-search + pmo-export + pmo-today + pmo-info 全面升级 | ✅ 已完成 |
+| **阶段四（v1.5.0）** | pmo-risk-scan + pmo-notify + pmo-stats + pmo-import + pmo-meeting-prep 新增；共享模块提取；文档一致性修复 | ✅ 已完成 |
+| **阶段五（P3规划）** | pmo-burn-down + pmo-changelog + pmo-retro（SKILL.md stub 已就绪） | 📋 规划中 |

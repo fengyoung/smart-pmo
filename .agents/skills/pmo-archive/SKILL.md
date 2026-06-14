@@ -15,7 +15,7 @@ metadata:
 ## 执行方式
 
 ```bash
-# 归档到指定目录
+# 归档单个文件到指定目录
 claude pmo-archive --file <路径> --dir <目录名>
 
 # 不指定目录则交互选择
@@ -23,6 +23,12 @@ claude pmo-archive --file <路径>
 
 # 自定义文件名
 claude pmo-archive --file <路径> --dir 03-需求文档 --rename "需求文档-v2.docx"
+
+# 批量归档目录下所有文件
+claude pmo-archive --dir <本地目录路径> --target <目标目录名>
+
+# 批量归档 + 指定目标目录（不指定 --target 则交互选择）
+claude pmo-archive --dir <本地目录路径>
 ```
 
 ## 前置条件
@@ -73,6 +79,28 @@ claude pmo-archive --file <路径> --dir 03-需求文档 --rename "需求文档-
    📎 [查看文件]
    目录: {目录名}
    日期: {日期}
+```
+
+### 批量归档（--dir 模式）
+
+当指定 `--dir <本地目录路径>` 时：
+
+1. 扫描目录下所有支持的文件（按扩展名过滤：docx/pdf/xlsx/pptx/png/jpg/md/txt）
+2. 跳过子目录，仅处理顶层文件
+3. 单文件上限 50MB，超过则跳过并标注 ⚠️
+4. 串行上传（避免飞书限流），每个文件完成后再处理下一个
+5. 进度展示：
+
+```
+📦 批量归档 · {本地目录路径}
+  发现 {N} 个文件 → 目标目录：{dir}
+
+  [1/{N}] ✅ requirements.docx
+  [2/{N}] ✅ design-spec.pdf
+  [3/{N}] ⚠️ large-file.zip（格式不支持，已跳过）
+  ...
+
+✅ 归档完成：{成功数}/{总数} 成功，{跳过数} 跳过
 ```
 
 ## 异常处理
