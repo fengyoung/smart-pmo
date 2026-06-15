@@ -20,25 +20,31 @@ Smart-PMO 是一套项目管理的 Skill 集合，通过一系列可复用的 Cl
 | Skill | 功能 | 状态 |
 |-------|------|------|
 | `pmo-init` | 项目初始化（创建 Base/知识库/配置）| ✅ |
-| `pmo-use` | 切换当前项目 | ✅ |
+| `pmo-use` | 切换当前项目 / 成员管理 | ✅ |
 | `pmo-list` | 列出所有项目 | ✅ |
-| `pmo-meeting-process` | 会议处理（妙记/外部转写）| ✅ |
+| `pmo-meeting-process` | 会议处理（妙记/外部转写/文本）| ✅ |
 | `pmo-todo-from-chat` | 群聊消息提取待办 | ✅ |
 | `pmo-todo-followup` | 待办跟进 | ✅ |
 | `pmo-archive` | 文档归档 | ✅ |
 | `pmo-milestone` | 里程碑管理 | ✅ |
-| `pmo-weekly-report` | 周报生成 | ✅ |
+| `pmo-weekly-report` | 周报生成（完整文档 + 归档）| ✅ |
+| `pmo-weekly-digest` | 轻量周报推送（消息卡片，不创建文档）| ✅ |
 | `pmo-pin` / `pmo-unpin` | 项目关注管理 | ✅ |
-| `pmo-dashboard` | 多项目概览 | ✅ |
+| `pmo-dashboard` | 多项目概览（风险视角）| ✅ |
 | `pmo-search` | 跨表跨项目搜索 | ✅ |
 | `pmo-export` | Base 数据导出 | ✅ |
-| `pmo-info` | 项目详细信息 | ✅ |
+| `pmo-import` | 批量导入待办/里程碑 | ✅ |
+| `pmo-info` | 项目详细信息 + 诊断 | ✅ |
 | `pmo-today` | 今日概览 | ✅ |
+| `pmo-standup` | 每日站会速报（个人视角，可推送）| ✅ |
 | `pmo-risk-scan` | 项目风险扫描 | ✅ |
 | `pmo-notify` | 主动提醒推送 | ✅ |
 | `pmo-stats` | 统计趋势分析 | ✅ |
-| `pmo-import` | 批量导入待办/里程碑 | ✅ |
 | `pmo-meeting-prep` | 会前议程准备 | ✅ |
+| `pmo-changelog` | 变更日志（AI 语义分类）| ✅ |
+| `pmo-burn-down` | 燃尽图（ASCII 终端渲染）| ✅ |
+| `pmo-retro` | 项目复盘（AI 辅助生成报告）| ✅ |
+| `pmo-health` | 项目健康检查（配置/连通性/队列诊断）| ✅ |
 
 ## 架构概览
 
@@ -134,4 +140,5 @@ claude pmo-use <项目名>
 | **阶段三（P2）** | pmo-search + pmo-export + pmo-today + pmo-info + 持续完善 | ✅ 已完成 |
 | **阶段四（v1.5.0）** | pmo-risk-scan + pmo-notify + pmo-stats + pmo-import + pmo-meeting-prep 新增；共享模块提取；文档一致性修复 | ✅ 已完成 |
 | **v1.5.1 优化** | 全面审查与优化：消除重复、统一共享模块、修复 depends_on、补齐公共模式引用、文档/测试同步 | ✅ 已完成 |
-| **阶段五（P3规划）** | pmo-burn-down + pmo-changelog + pmo-retro（SKILL.md stub 已就绪）| 📋 规划中 |
+| **阶段五（P3，v1.6.0）** | pmo-burn-down + pmo-changelog + pmo-retro 完整实现；新增 pmo-health + pmo-standup + pmo-weekly-digest | ✅ 已完成 |
+| **阶段六（P4规划）** | 待定 | 📋 规划中 |

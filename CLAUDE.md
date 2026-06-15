@@ -1,7 +1,7 @@
 # Smart-PMO 项目手册
 
 > 基于 Claude Code + 飞书 CLI 的项目管理工具集
-> 项目版本：见根目录 `VERSION` 文件（当前 v1.5.1）
+> 项目版本：见根目录 `VERSION` 文件（当前 v1.6.0）
 
 ---
 
@@ -332,4 +332,5 @@ baseUrl = https://bytedance.larkoffice.com/base/{config.larkResources.baseAppTok
 | **阶段三（P2）** | pmo-search + pmo-export + pmo-today + pmo-info 全面升级 | ✅ 已完成 |
 | **阶段四（v1.5.0）** | pmo-risk-scan + pmo-notify + pmo-stats + pmo-import + pmo-meeting-prep 新增；共享模块提取；文档一致性修复 | ✅ 已完成 |
 | **v1.5.1 优化** | 全面审查与优化（P0-P3）：消除三重重复、统一共享模块引用、补齐 5 个 P2 Skill 公共模式引用、修复 depends_on 声明、文档同步、测试 checklist 全覆盖 | ✅ 已完成 |
-| **阶段五（P3规划）** | pmo-burn-down + pmo-changelog + pmo-retro（SKILL.md stub 已就绪） | 📋 规划中 |
+| **阶段五（P3，v1.6.0）** | pmo-burn-down + pmo-changelog + pmo-retro 完整实现；新增 pmo-health + pmo-standup + pmo-weekly-digest | ✅ 已完成 |
+| **阶段六（P4规划）** | 待定 | 📋 规划中 |
