@@ -1,7 +1,7 @@
 # Smart-PMO 项目手册
 
 > 基于 Claude Code + 飞书 CLI 的项目管理工具集
-> 项目版本：见根目录 `VERSION` 文件（当前 v1.6.1）
+> 项目版本：见根目录 `VERSION` 文件（当前 v1.6.2）
 
 ---
 
@@ -37,7 +37,7 @@ smart-pmo/
 
 ├── .agents/                             # Claude Code Skill 定义
 │   └── skills/
-│       ├── _shared/                      # 公共模块（日期计算、待处理队列检查等）
+│       ├── _shared/                      # 公共模块（日期计算、待处理队列检查、卡片模板等）
 │       ├── pmo-*/                        # 各 Skill 目录
 │       └── ...
 
@@ -327,6 +327,10 @@ baseUrl = https://bytedance.larkoffice.com/base/{config.larkResources.baseAppTok
 
 > 📅 详见 [`_shared/date-calc-rules.md`](.agents/skills/_shared/date-calc-rules.md)。包含模糊时间表达计算规则和优先级推断规则。
 
+### 公共：卡片消息模板（所有 Skill 统一遵循）
+
+> 📋 详见 [`_shared/feishu-card-template.md`](.agents/skills/_shared/feishu-card-template.md)。包含飞书卡片消息（interactive）的构造模板、色谱选择、以及 Python 构造示例。
+
 ---
 
 <!-- 飞书智能体 Bot 已废弃（飞书计费策略调整），不再使用 -->
@@ -344,4 +348,5 @@ baseUrl = https://bytedance.larkoffice.com/base/{config.larkResources.baseAppTok
 | **v1.5.1 优化** | 全面审查与优化（P0-P3）：消除三重重复、统一共享模块引用、补齐 5 个 P2 Skill 公共模式引用、修复 depends_on 声明、文档同步、测试 checklist 全覆盖 | ✅ 已完成 |
 | **阶段五（P3，v1.6.0）** | pmo-burn-down + pmo-changelog + pmo-retro 完整实现；新增 pmo-health + pmo-standup + pmo-weekly-digest | ✅ 已完成 |
 | **v1.6.1 优化** | 全面审查与优化（P0-P2）：补齐交互确认、消除内联重复、统一共享模块引用、补全重试策略、收紧权限、版本号对齐、模板增强、新增验证脚本 | ✅ 已完成 |
+| **v1.6.2 优化** | 新增飞书卡片消息模板共享模块（feishu-card-template），支持 interactive 类型通知，含 Python 构造器、色谱对照、Skill 引用规范 | ✅ 已完成 |
 | **阶段六（P4规划）** | 待定 | 📋 规划中 |
