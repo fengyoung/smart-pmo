@@ -48,7 +48,7 @@ smart-pmo/
 ├── templates/                          # 文档模板
 │   ├── meeting-notes-template.md       # 会议纪要文档模板
 │   ├── weekly-report-template.md       # 周报文档模板
-│   └── asr-correction-table-template.md # ASR 校正表模板（参考 Iris）
+│   └── asr-correction-table-template.md # ASR 校正表模板
 ```
 
 ---
