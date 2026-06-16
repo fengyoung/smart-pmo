@@ -1,6 +1,6 @@
 ---
 name: pmo-info
-version: 1.6.0
+version: 1.6.2
 description: "查看当前项目详细信息：成员、待办统计、里程碑进度、资源链接。从配置和 Base 实时拉取数据。"
 metadata:
   requires:

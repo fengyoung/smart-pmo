@@ -1,6 +1,6 @@
 ---
 name: pmo-unpin
-version: 1.2.0
+version: 1.6.2
 description: "取消关注项目。从 pmo-dashboard 关注列表中移除指定项目。"
 metadata:
   requires:

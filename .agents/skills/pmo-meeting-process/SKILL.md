@@ -1,6 +1,6 @@
 ---
 name: pmo-meeting-process
-version: 1.5.0
+version: 1.6.2
 description: "处理会议录音/转写，自动提取纪要、关键决策和待办事项。支持飞书妙记和外部转写文件两种输入源。新增：--no-confirm 跳过交互确认、--local 生成本地 .md 文件（用于批量/离线场景）。"
 metadata:
   requires:

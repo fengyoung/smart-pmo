@@ -1,6 +1,6 @@
 ---
 name: pmo-milestone
-version: 1.6.0
+version: 1.6.2
 description: "里程碑管理：查看里程碑列表、新增里程碑、修改里程碑、标记完成、到期检查。列表展示带行序号，--modify 和 --complete 均支持行序号代替 MILE-ID。"
 metadata:
   requires:

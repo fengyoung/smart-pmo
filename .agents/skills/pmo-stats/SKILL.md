@@ -1,6 +1,6 @@
 ---
 name: pmo-stats
-version: 1.5.0
+version: 1.6.2
 description: "项目统计分析：按周/月展示待办完成趋势、新增vs完成对比、完成速率、负责人贡献分布。生成 ASCII 趋势图和统计数据。"
 metadata:
   requires:

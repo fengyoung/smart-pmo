@@ -1,6 +1,6 @@
 ---
 name: pmo-health
-version: 1.6.0
+version: 1.6.2
 description: "项目健康检查：诊断当前项目的配置完整性、Base/Wiki 连通性、待处理队列积压、配置版本等，输出类 brew doctor 的健康报告。"
 metadata:
   requires:

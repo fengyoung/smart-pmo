@@ -1,6 +1,6 @@
 ---
 name: pmo-dashboard
-version: 1.6.0
+version: 1.6.2
 description: "项目风险视角仪表盘：展示所有关注项目的全员待办和里程碑告警统计。与 pmo-today（个人视角）互补：pmo-dashboard 关注\"项目整体风险\"，不区分负责人；pmo-today 关注\"我今天要做什么\"。从 Base 实时拉取数据，展示后自动提示下钻。"
 metadata:
   requires:

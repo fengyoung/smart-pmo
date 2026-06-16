@@ -1,6 +1,6 @@
 ---
 name: pmo-archive
-version: 1.6.0
+version: 1.6.2
 description: "文档归档：将本地文件上传到项目知识库指定目录。支持 docx/pdf/xlsx/pptx/png/jpg/md/txt，≤50MB。"
 metadata:
   requires:

@@ -1,6 +1,6 @@
 ---
 name: pmo-changelog
-version: 1.6.0
+version: 1.6.2
 description: "变更日志：汇总指定周期内已完成待办和里程碑为自然语言 Changelog，适合对外发布或团队同步。支持按周/月/里程碑范围生成，可导出 Markdown 或归档到知识库。"
 metadata:
   requires:

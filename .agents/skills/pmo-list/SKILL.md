@@ -1,6 +1,6 @@
 ---
 name: pmo-list
-version: 1.6.0
+version: 1.6.2
 description: "列出所有已注册的项目，显示状态、项目经理、实时待办和里程碑统计。支持查看所有 active 和 archived 项目。"
 metadata:
   requires:

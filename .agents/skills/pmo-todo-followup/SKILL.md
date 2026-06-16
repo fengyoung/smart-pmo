@@ -1,6 +1,6 @@
 ---
 name: pmo-todo-followup
-version: 1.6.0
+version: 1.6.2
 description: "待办事项跟进：查看、筛选、标记完成、修改负责人/截止日期。支持 --mine/--overdue/--status/--all/--complete/--modify 参数。--all 模式下支持 --project 指定目标项目，无需切换上下文。"
 metadata:
   requires:

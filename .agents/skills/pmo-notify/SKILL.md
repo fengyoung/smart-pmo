@@ -1,6 +1,6 @@
 ---
 name: pmo-notify
-version: 1.5.0
+version: 1.6.2
 description: "主动提醒：自动检查过期待办和即将到期里程碑，向项目群推送提醒卡片。支持 --dry-run 预览，支持 --project 指定项目。"
 metadata:
   requires:

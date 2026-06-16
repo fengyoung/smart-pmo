@@ -1,6 +1,6 @@
 ---
 name: pmo-retro
-version: 1.6.0
+version: 1.6.2
 description: "项目复盘：基于会议纪要文档和待办数据，AI 辅助生成复盘报告（做得好的 / 待改进的 / 行动计划），可选将行动计划写入 Base 待办，并归档到知识库。"
 metadata:
   requires:

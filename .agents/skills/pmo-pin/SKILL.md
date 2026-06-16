@@ -1,6 +1,6 @@
 ---
 name: pmo-pin
-version: 1.2.0
+version: 1.6.2
 description: "关注/取消关注项目。被关注的项目在 pmo-dashboard 中集中展示概览。"
 metadata:
   requires:

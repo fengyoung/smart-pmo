@@ -1,6 +1,6 @@
 ---
 name: pmo-burn-down
-version: 1.6.0
+version: 1.6.2
 description: "燃尽图：基于里程碑关联待办的完成情况，生成 ASCII 燃尽图，可视化项目进度与理想线的偏差，并推算预计完成日期。"
 metadata:
   requires:

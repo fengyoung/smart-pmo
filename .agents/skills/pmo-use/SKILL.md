@@ -1,6 +1,6 @@
 ---
 name: pmo-use
-version: 1.6.0
+version: 1.6.2
 description: "切换当前项目上下文。根据项目名从 ~/.smart-pmo/registry/ 加载配置，后续所有 pmo-* 命令操作目标项目。支持 --archive / --activate 修改项目状态。"
 metadata:
   requires:

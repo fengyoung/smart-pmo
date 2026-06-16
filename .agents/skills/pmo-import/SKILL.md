@@ -1,6 +1,6 @@
 ---
 name: pmo-import
-version: 1.5.0
+version: 1.6.2
 description: "批量导入：从 CSV 或 Excel 文件批量导入待办事项和里程碑到 Base。支持字段映射、去重检查、预览确认。单次最多 200 条。"
 metadata:
   requires:

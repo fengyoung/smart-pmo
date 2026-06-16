@@ -1,6 +1,6 @@
 ---
 name: pmo-weekly-report
-version: 1.6.0
+version: 1.6.2
 description: "自动生成项目周报。从 Base 统计本周会议、待办完成率、里程碑进展，生成格式化周报文档并归档到知识库。支持与上周数据对比，展示趋势变化。支持 --send 推送周报摘要到项目群。"
 metadata:
   requires:

@@ -1,6 +1,6 @@
 ---
 name: pmo-export
-version: 1.6.0
+version: 1.6.2
 description: "导出项目 Base 数据为 CSV 或 JSON 文件。支持指定导出表、格式、输出路径。CSV 采用 UTF-8 BOM 编码以兼容 Excel 直接打开。"
 metadata:
   requires:

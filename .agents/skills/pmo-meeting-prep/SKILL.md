@@ -1,6 +1,6 @@
 ---
 name: pmo-meeting-prep
-version: 1.5.0
+version: 1.6.2
 description: "会前准备：自动拉取上次会议未完成待办、临近到期里程碑、长期无进展待办，生成议程文档并可选推送到项目群。帮助会议主持人高效准备。"
 metadata:
   requires:

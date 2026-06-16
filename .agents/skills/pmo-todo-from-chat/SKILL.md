@@ -1,6 +1,6 @@
 ---
 name: pmo-todo-from-chat
-version: 1.6.0
+version: 1.6.2
 description: "从项目群聊消息中自动提取待办事项。支持多群并发读取，AI 分析提取待办，经用户确认后写入 Base 待办表。内置3层去重机制避免重复录入。"
 metadata:
   requires:

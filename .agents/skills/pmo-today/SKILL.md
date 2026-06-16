@@ -1,6 +1,6 @@
 ---
 name: pmo-today
-version: 1.6.0
+version: 1.6.2
 description: "今日概览：展示今日截止待办、已过期待办、7天内到期里程碑、今日会议。快速定位当天需要处理的事项。支持 --all 跨所有关注项目。"
 metadata:
   requires:
