@@ -1,6 +1,6 @@
 ---
 name: pmo-archive
-version: 1.1.0
+version: 1.6.0
 description: "文档归档：将本地文件上传到项目知识库指定目录。支持 docx/pdf/xlsx/pptx/png/jpg/md/txt，≤50MB。"
 metadata:
   requires:
@@ -8,6 +8,7 @@ metadata:
   depends_on:
     - lark-wiki
     - lark-drive
+    - lark-base
 ---
 
 # pmo-archive — 文档归档
@@ -35,6 +36,38 @@ claude pmo-archive --dir <本地目录路径>
 
 已通过 `pmo-use` 设置当前项目。
 
+## 公共模式引用
+
+### 配置加载
+
+按 CLAUDE.md「读取当前项目配置」规则加载项目配置：
+
+1. 优先读取环境变量 `$SMART_PMO_CURRENT`
+2. 若无环境变量，读取文件 `~/.smart-pmo/current`
+3. 用 project_id 加载 `~/.smart-pmo/registry/{project_id}.json`
+4. 文件不存在或为空 → 提示「请先执行 pmo-use <项目名>」，中断执行
+5. 检查 `schemaVersion`，执行必要的版本迁移
+6. 执行配置完整性校验
+
+### 配置完整性校验
+
+1. 必填字段检查：`project.name`、`larkResources.baseAppToken`、`larkResources.wikiSpaceId`、`larkResources.wikiNodeTokens` 不为空
+2. 若任一必填字段缺失 → 提示「配置不完整，缺少: {字段列表}。建议重新运行 pmo-init 修复」
+
+### 错误重试策略
+
+所有飞书 API 写操作（Wiki 创建、Drive 上传）遵循公共错误重试策略（见 CLAUDE.md）：3 次指数退避重试（1s/3s/5s）。
+
+**重试耗尽后的人工介入：**
+
+| 失败场景 | 终端提示 | 具体操作引导 |
+|---------|---------|------------|
+| Wiki 归档失败 | `❌ 知识库归档失败（{错误码}）` | `→ 请在 pmo-archive 手动归档：claude pmo-archive <文件路径>` |
+
+### 待处理队列检查
+
+> 📋 详见 [`_shared/pending-queue-check.md`](../_shared/pending-queue-check.md)。执行开始时检查 `~/.smart-pmo/` 下的四个待处理目录。
+
 ## 执行流程
 
 ### 第1步：读取文件和选择目录
@@ -53,7 +86,27 @@ claude pmo-archive --dir <本地目录路径>
 6. 99-归档
 ```
 
-### 第2步：上传到知识库
+### 第2步：用户确认
+
+上传前展示确认信息，等待用户确认后再执行：
+
+```
+📋 归档确认
+──────────────────────────────
+  文件: {文件名}（{文件大小}）
+  目标目录: {目录名}
+  上传方式: {方式A 直接创建 | 方式B 云文档+快捷方式}
+──────────────────────────────
+
+是否确认归档？[Y/n]
+```
+
+- 用户选择 `Y` 或回车 → 继续执行上传
+- 用户选择 `n` → 取消归档，终端输出 `⏸️ 已取消归档`
+
+**批量模式（`--dir`）**：确认界面展示文件总数和汇总大小，获得确认后开始串行上传。
+
+### 第3步：上传到知识库
 
 飞书 wiki API 对不同文件格式的支持方式不同：
 
@@ -73,7 +126,7 @@ claude pmo-archive --dir <本地目录路径>
 - **去重保护**：若文件名已以 `YYYYMMDD-` 开头（如 `20260609-会议纪要.docx`），不再重复添加前缀
 - 指定 `--rename "自定义名称"`：以指定名称为准，不再添加日期前缀（用户自己决定命名）
 
-### 第3步：完成确认
+### 第4步：完成确认
 
 ```
 ✅ 已归档: {文件名}

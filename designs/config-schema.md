@@ -179,9 +179,10 @@ ICS
 
 ```
 function getCurrentProjectConfig():
-    1. 读取 ~/.smart-pmo/current 文件，获取项目名
-    2. 从 ~/.smart-pmo/registry/<项目名>.json 读取完整配置
-    3. 如果文件不存在或为空 → 提示用户 "请先执行 pmo-use <项目名> 设置当前项目"
+    1. 优先读取环境变量 $SMART_PMO_CURRENT
+    2. 若无环境变量，读取 ~/.smart-pmo/current 文件，获取项目名
+    3. 从 ~/.smart-pmo/registry/<项目名>.json 读取完整配置
+    4. 如果文件不存在或为空 → 提示用户 "请先执行 pmo-use <项目名> 设置当前项目"
 ```
 
 ### pmo-use 命令对配置的修改

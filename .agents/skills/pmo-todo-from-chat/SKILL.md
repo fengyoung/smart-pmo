@@ -1,6 +1,6 @@
 ---
 name: pmo-todo-from-chat
-version: 1.2.0
+version: 1.6.0
 description: "从项目群聊消息中自动提取待办事项。支持多群并发读取，AI 分析提取待办，经用户确认后写入 Base 待办表。内置3层去重机制避免重复录入。"
 metadata:
   requires:
@@ -8,6 +8,7 @@ metadata:
   depends_on:
     - lark-im
     - lark-base
+    - lark-contact
 ---
 
 # pmo-todo-from-chat — 群聊消息提取待办
@@ -24,6 +25,36 @@ claude pmo-todo-from-chat
 1. 已通过 `pmo-use` 设置当前项目
 2. 项目配置中有 `larkResources.chatIds`（至少一个群 ID）
 3. `chat.readPositions[<chat_id>]` 为首次执行时自动初始化（读最近 7 天）
+
+## 公共模式引用
+
+### 配置加载
+
+按 CLAUDE.md「读取当前项目配置」规则加载项目配置：
+
+1. 优先读取环境变量 `$SMART_PMO_CURRENT`
+2. 若无环境变量，读取文件 `~/.smart-pmo/current`
+3. 用 project_id 加载 `~/.smart-pmo/registry/{project_id}.json`
+4. 文件不存在或为空 → 提示「请先执行 pmo-use <项目名>」，中断执行
+5. 检查 `schemaVersion`，执行必要的版本迁移（见 CLAUDE.md 版本迁移表）
+6. 执行配置完整性校验
+
+### 配置完整性校验
+
+1. 必填字段检查：`project.name`、`larkResources.baseAppToken`、`larkResources.baseTableIds.todos`、`larkResources.chatIds` 不为空
+2. 若任一必填字段缺失 → 提示「配置不完整，缺少: {字段列表}。建议重新运行 pmo-init 修复」
+
+### 错误重试策略
+
+所有 Base 写操作遵循公共错误重试策略（见 CLAUDE.md）：3 次指数退避重试（1s/3s/5s）。
+
+### 待处理队列检查
+
+> 📋 详见 [`_shared/pending-queue-check.md`](../_shared/pending-queue-check.md)。执行开始时检查 `~/.smart-pmo/` 下的四个待处理目录。
+
+### 日期计算
+
+> 📅 详见 [`_shared/date-calc-rules.md`](../_shared/date-calc-rules.md)。模糊时间表达（如「尽快」「下周X」「月底」）按共享模块规则计算。
 
 ## 执行流程
 
@@ -83,28 +114,9 @@ for chat_id in chat_ids:
 | 截止时间 | 如"这周五""下周一""尽快" |
 | 优先级 | 从消息语气和关键词推断（见下方优先级推断规则） |
 
-**优先级推断规则（从群聊消息语义推断，默认 P2-一般）：**
+**优先级推断规则（从群聊消息语义推断）：** 详见 [`_shared/date-calc-rules.md`](../_shared/date-calc-rules.md) 中的优先级推断规则。
 
-| 关键词/模式 | 推断优先级 | 说明 |
-|------------|-----------|------|
-| "紧急"、"P0"、"今天就要"、"马上"、"立刻" | P0-紧急 | 强紧急信号 |
-| "尽快"、"ASAP"、"这周"、"重要"、"P1"、"老板说了" | P1-重要 | 明确的时间压力/重要性 |
-| "不急"、"有空再做"、"低优"、"P3" | P3-低优 | 明确的低优先级信号 |
-| 无特殊信号 | P2-一般 | 默认值 |
-
-示例：
-- "这个需求今天就要上线，李四你处理一下" → P0-紧急
-- "接口文档尽快更新一下" → P1-重要
-- "等有空的时候看看这个" → P3-低优
-
-**截止时间动态计算（基于 currentDate）：**
-- "尽快" / "ASAP" → currentDate + 3天
-- "今天" → currentDate
-- "明天" → currentDate + 1天
-- "这周五" → 本周五（若今日已是周五则取下周五）
-- "下周X" → 下一周对应星期X
-- "月底" → 当月最后一天
-- 未提及 → 截止日期留空，确认界面标注 ⚠️ 截止时间未指定
+**截止时间动态计算：** 详见 [`_shared/date-calc-rules.md`](../_shared/date-calc-rules.md)，基于 `currentDate` 计算，未提及则留空并在确认界面标注 ⚠️ 截止时间未指定。
 
 **成员名称解析（负责人字段）— 写入前必须完成验证：**
 

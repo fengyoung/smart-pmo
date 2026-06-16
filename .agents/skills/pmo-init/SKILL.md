@@ -1,6 +1,6 @@
 ---
 name: pmo-init
-version: 1.1.0
+version: 1.6.0
 description: "交互式初始化新项目：创建飞书知识空间、多维表格 Base（待办/里程碑/会议索引 3 张表）、注册项目配置。按提示收集项目信息后自动完成全部基础设施搭建。支持断点恢复：每步执行前检查资源是否已存在，重跑安全。"
 metadata:
   requires:
@@ -9,6 +9,7 @@ metadata:
     - lark-wiki
     - lark-base
     - lark-im
+    - lark-contact
 ---
 
 # pmo-init — 项目初始化
@@ -26,6 +27,8 @@ claude pmo-init --from <项目名>
 ## 前置条件
 
 1. 用户已确认要初始化的项目群聊
+
+**所有飞书 API 写操作（Wiki 创建、Base 建表、IM 操作等）遵循公共错误重试策略（见 CLAUDE.md）：3 次指数退避重试（1s/3s/5s）。**
 
 ## 执行流程
 

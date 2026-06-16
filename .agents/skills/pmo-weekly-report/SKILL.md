@@ -1,6 +1,6 @@
 ---
 name: pmo-weekly-report
-version: 1.2.0
+version: 1.6.0
 description: "自动生成项目周报。从 Base 统计本周会议、待办完成率、里程碑进展，生成格式化周报文档并归档到知识库。支持与上周数据对比，展示趋势变化。支持 --send 推送周报摘要到项目群。"
 metadata:
   requires:
@@ -46,16 +46,7 @@ claude pmo-weekly-report --send --chat-id <chat_id>
 
 ### 公共：待处理队列检查
 
-执行前先检查以下目录（按 CLAUDE.md 公共约定）：
-
-| 目录 | 用途 | 处理方式 |
-|------|------|---------|
-| `~/.smart-pmo/.pending_backfill/` | 会议索引产出待办回填失败 | 自动重试回填，成功删文件；重试耗尽见 CLAUDE.md 人工介入出口 |
-| `~/.smart-pmo/.pending_orphan_meeting/` | 孤立会议记录（步骤②成功+步骤③全部失败）| 提示用户执行 `--index-only` 补录 |
-| `~/.smart-pmo/.pending_assignee/` | 负责人 API 写入失败 | 提示用户存在待分配记录 |
-| `~/.smart-pmo/.draft/` | 用户取消的解析草稿 | 提示用户存在缓存草稿 |
-
-过期清理规则见 CLAUDE.md「待处理队列过期清理规则」。
+> 📋 详见 [`_shared/pending-queue-check.md`](../_shared/pending-queue-check.md)。执行开始时检查 `~/.smart-pmo/` 下的四个待处理目录。
 
 ### 配置加载
 

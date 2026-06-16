@@ -130,6 +130,8 @@ claude pmo-use <项目名>
 - [配置 Schema](designs/config-schema.md) — 配置文件结构
 - [Bot 配置指南](designs/bot-setup-guide.md) — 飞书智能体配置步骤（已归档）
 - [使用手册](使用手册.md) — 完整使用指南
+- [测试 Checklist](tests/skill-checklist.md) — Skill 手动回归测试
+- [Skill 验证脚本](scripts/validate-skills.sh) — Frontmatter + depends_on 自动验证
 
 ## 实施路线
 
@@ -141,4 +143,5 @@ claude pmo-use <项目名>
 | **阶段四（v1.5.0）** | pmo-risk-scan + pmo-notify + pmo-stats + pmo-import + pmo-meeting-prep 新增；共享模块提取；文档一致性修复 | ✅ 已完成 |
 | **v1.5.1 优化** | 全面审查与优化：消除重复、统一共享模块、修复 depends_on、补齐公共模式引用、文档/测试同步 | ✅ 已完成 |
 | **阶段五（P3，v1.6.0）** | pmo-burn-down + pmo-changelog + pmo-retro 完整实现；新增 pmo-health + pmo-standup + pmo-weekly-digest | ✅ 已完成 |
+| **v1.6.1 优化** | 全面审查与优化（P0-P2）：补齐交互确认、消除内联重复、统一共享模块引用、补全重试策略、收紧权限、版本号对齐、模板增强、新增验证脚本 | ✅ 已完成 |
 | **阶段六（P4规划）** | 待定 | 📋 规划中 |

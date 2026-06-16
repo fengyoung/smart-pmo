@@ -1,6 +1,6 @@
 ---
 name: pmo-list
-version: 1.1.0
+version: 1.6.0
 description: "列出所有已注册的项目，显示状态、项目经理、实时待办和里程碑统计。支持查看所有 active 和 archived 项目。"
 metadata:
   requires:
@@ -38,6 +38,7 @@ claude pmo-list --json
    - 待办总数 / 待处理数 / 已过期数
    - 里程碑总数 / 进行中数 / 即将到期数（7天内）
    - 查询超时 10s 的项目标注 `⚠️ 超时`，不阻塞其他项目
+   - **Base 查询失败时遵循公共错误重试策略：3 次指数退避重试（1s/3s/5s）**
 
 6. 展示表格：
 

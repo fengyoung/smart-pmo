@@ -49,7 +49,7 @@ claude pmo-weekly-digest --week YYYY-MM-DD
 
 已通过 `pmo-use` 设置当前项目（`--all` 模式不需要）。
 
-**Base 读操作超时遵循 CLAUDE.md 公共配置（单次 20s，并发 30s）。**
+**Base 读操作超时遵循 CLAUDE.md 公共配置（单次 20s，并发 30s）。所有飞书 API 写操作（IM 推送）遵循公共错误重试策略：3 次指数退避重试（1s/3s/5s）。**
 
 ## 执行流程
 

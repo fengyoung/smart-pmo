@@ -1,7 +1,7 @@
 # Smart-PMO 项目手册
 
 > 基于 Claude Code + 飞书 CLI 的项目管理工具集
-> 项目版本：见根目录 `VERSION` 文件（当前 v1.6.0）
+> 项目版本：见根目录 `VERSION` 文件（当前 v1.6.1）
 
 ---
 
@@ -33,6 +33,7 @@ smart-pmo/
 ├── CLAUDE.md                           # 本文件 — 项目手册
 ├── REQUIREMENTS.md                     # 完整需求清单
 ├── README.md                           # 项目概述与快速开始
+├── VERSION                             # 项目唯一版本源
 
 ├── .agents/                             # Claude Code Skill 定义
 │   └── skills/
@@ -49,6 +50,15 @@ smart-pmo/
 │   ├── meeting-notes-template.md       # 会议纪要文档模板
 │   ├── weekly-report-template.md       # 周报文档模板
 │   └── asr-correction-table-template.md # ASR 校正表模板
+
+├── tests/                              # 测试
+│   └── skill-checklist.md              # Skill 手动回归测试清单
+
+├── scripts/                            # 工具脚本
+│   └── validate-skills.sh              # Skill frontmatter + depends_on 验证
+
+├── output/                             # 外部转写文件存放（.gitignore 排除）
+│   └── README.md                       # 目录用途说明
 ```
 
 ---
@@ -333,4 +343,5 @@ baseUrl = https://bytedance.larkoffice.com/base/{config.larkResources.baseAppTok
 | **阶段四（v1.5.0）** | pmo-risk-scan + pmo-notify + pmo-stats + pmo-import + pmo-meeting-prep 新增；共享模块提取；文档一致性修复 | ✅ 已完成 |
 | **v1.5.1 优化** | 全面审查与优化（P0-P3）：消除三重重复、统一共享模块引用、补齐 5 个 P2 Skill 公共模式引用、修复 depends_on 声明、文档同步、测试 checklist 全覆盖 | ✅ 已完成 |
 | **阶段五（P3，v1.6.0）** | pmo-burn-down + pmo-changelog + pmo-retro 完整实现；新增 pmo-health + pmo-standup + pmo-weekly-digest | ✅ 已完成 |
+| **v1.6.1 优化** | 全面审查与优化（P0-P2）：补齐交互确认、消除内联重复、统一共享模块引用、补全重试策略、收紧权限、版本号对齐、模板增强、新增验证脚本 | ✅ 已完成 |
 | **阶段六（P4规划）** | 待定 | 📋 规划中 |

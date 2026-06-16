@@ -1,6 +1,6 @@
 ---
 name: pmo-dashboard
-version: 1.3.0
+version: 1.6.0
 description: "项目风险视角仪表盘：展示所有关注项目的全员待办和里程碑告警统计。与 pmo-today（个人视角）互补：pmo-dashboard 关注\"项目整体风险\"，不区分负责人；pmo-today 关注\"我今天要做什么\"。从 Base 实时拉取数据，展示后自动提示下钻。"
 metadata:
   requires:
@@ -25,20 +25,13 @@ claude pmo-dashboard
 
 至少有关注项目（已用 `pmo-pin` 关注）或 active 项目。
 
+**所有 Base 查询操作遵循公共超时配置（单次 20s，并发 30s，见 CLAUDE.md）。写操作失败时遵循公共错误重试策略：3 次指数退避重试（1s/3s/5s）。**
+
 ## 执行流程
 
 ### 公共：待处理队列检查
 
-执行前先检查以下目录（按 CLAUDE.md 公共约定）：
-
-| 目录 | 用途 | 处理方式 |
-|------|------|---------|
-| `~/.smart-pmo/.pending_backfill/` | 会议索引产出待办回填失败 | 自动重试回填，成功删文件；重试耗尽见 CLAUDE.md 人工介入出口 |
-| `~/.smart-pmo/.pending_orphan_meeting/` | 孤立会议记录（步骤②成功+步骤③全部失败）| 提示用户执行 `--index-only` 补录 |
-| `~/.smart-pmo/.pending_assignee/` | 负责人 API 写入失败 | 提示用户存在待分配记录 |
-| `~/.smart-pmo/.draft/` | 用户取消的解析草稿 | 提示用户存在缓存草稿 |
-
-过期清理规则见 CLAUDE.md「待处理队列过期清理规则」。
+> 📋 详见 [`_shared/pending-queue-check.md`](../_shared/pending-queue-check.md)。执行开始时检查 `~/.smart-pmo/` 下的四个待处理目录。
 
 ### 项目列表确定
 

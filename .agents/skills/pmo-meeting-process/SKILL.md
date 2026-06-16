@@ -11,6 +11,7 @@ metadata:
     - lark-wiki
     - lark-base
     - lark-im
+    - lark-contact
 ---
 
 # pmo-meeting-process — 会议处理
@@ -115,7 +116,7 @@ config = get_current_project_config()
 
 ### 第3步：AI 提取结构化信息
 
-分析转写内容，提取以下信息。**调用 LLM 时使用结构化 Prompt 模板（详见 `_shared/meeting-prompt-template.md`），模板包含三段式结构：背景上下文 → 任务说明 → 输出格式。**
+分析转写内容，提取以下信息。**调用 LLM 时使用结构化 Prompt 模板（详见 `references/meeting-prompt-template.md`），模板包含三段式结构：背景上下文 → 任务说明 → 输出格式。**
 
 **ASR 校正（前置环节）：**
 - 将第 2.5 步加载的 ASR 校正表注入 prompt 的「背景上下文」段

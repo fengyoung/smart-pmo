@@ -1,6 +1,6 @@
 # Smart-PMO 项目需求清单
 
-> 最后更新：2026-06-12
+> 最后更新：2026-06-16
 
 ---
 
@@ -388,6 +388,12 @@ Smart-PMO 是一套基于 **Claude Code Skill 系统 + 飞书 CLI** 的项目管
 | `pmo-stats` | 项目统计分析 | P2 | `claude pmo-stats` |
 | `pmo-import` | 文件批量导入待办 | P2 | `claude pmo-import --file <path>` |
 | `pmo-meeting-prep` | 会前准备议程生成 | P2 | `claude pmo-meeting-prep` |
+| `pmo-burn-down` | 燃尽图生成 | P3 | `claude pmo-burn-down` |
+| `pmo-changelog` | 变更日志生成 | P3 | `claude pmo-changelog` |
+| `pmo-retro` | 复盘报告生成 | P3 | `claude pmo-retro` |
+| `pmo-health` | 项目健康诊断 | P3 | `claude pmo-health` |
+| `pmo-standup` | 每日站会报告 | P3 | `claude pmo-standup` |
+| `pmo-weekly-digest` | 轻量周报推送 | P3 | `claude pmo-weekly-digest` |
 
 ---
 
@@ -400,7 +406,9 @@ Smart-PMO 是一套基于 **Claude Code Skill 系统 + 飞书 CLI** 的项目管
 | **阶段三（P2）** | pmo-search + pmo-export + pmo-today + pmo-info 全面升级 + 持续完善 | 检索增强 + 工具链完整 | ✅ 已完成 |
 | **阶段四（v1.5.0）** | pmo-risk-scan + pmo-notify + pmo-stats + pmo-import + pmo-meeting-prep 新增；共享模块提取；文档一致性修复 | 风险管理 + 主动通知 + 数据导入 | ✅ 已完成 |
 | **v1.5.1 优化** | 全面审查与优化（P0-P3）：消除三重重复、统一共享模块引用、补齐公共模式引用、修复 depends_on、文档/测试同步 | 维护性优化 | ✅ 已完成 |
-| **阶段五（P3规划）** | pmo-burn-down + pmo-changelog + pmo-retro（SKILL.md stub 已就绪） | 燃尽图 + 变更日志 + 回顾 | 📋 规划中 |
+| **阶段五（P3，v1.6.0）** | pmo-burn-down + pmo-changelog + pmo-retro + pmo-health + pmo-standup + pmo-weekly-digest 完整实现 | 燃尽图 + 变更日志 + 回顾 + 健康诊断 + 站会 + 轻量周报 | ✅ 已完成 |
+| **v1.6.1 优化** | 全面审查与优化（P0-P2）：补齐交互确认、消除内联重复、统一共享模块引用、补全重试策略、收紧权限、版本号对齐、模板增强、新增验证脚本 | 维护性优化 | ✅ 已完成 |
+| **阶段六（P4 规划）** | 待定 | 待定 | 📋 规划中 |
 
 ---
 

@@ -43,6 +43,7 @@ claude pmo-stats --export stats-report.md
 **公共模式引用：**
 - 📋 待处理队列检查详见 [`_shared/pending-queue-check.md`](../_shared/pending-queue-check.md)
 - ⏱️ Base 查询超时遵循公共配置：单次 20s，并发多项目 30s（见 CLAUDE.md）
+- 🔄 所有飞书 API 写操作遵循公共错误重试策略：3 次指数退避重试（1s/3s/5s）
 - 🔍 配置加载时执行 schemaVersion 检查和配置完整性校验（见 CLAUDE.md）
 
 ## 执行流程

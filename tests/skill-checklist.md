@@ -1,7 +1,7 @@
 # Smart-PMO Skill 测试 Checklist
 
 > 用于每次修改 Skill 后进行回归测试
-> 最后更新：2026-06-14
+> 最后更新：2026-06-16
 
 ---
 
@@ -400,6 +400,119 @@
 
 ---
 
+## pmo-burn-down
+
+### Happy Path
+- [ ] `claude pmo-burn-down` — 选择里程碑后生成 ASCII 燃尽图
+- [ ] `claude pmo-burn-down --milestone "M1"` — 指定里程碑
+- [ ] `claude pmo-burn-down --all-milestones` — 所有里程碑燃尽图
+- [ ] 燃尽图显示理想线 vs 实际线
+- [ ] 显示速率统计（每日完成数）
+
+### Edge Cases
+- [ ] 无关联待办的里程碑 → 提示无数据可绘制
+- [ ] startDate 晚于今天 → 提示里程碑尚未开始
+- [ ] 零完成速率 → 显示平坦实际线
+- [ ] 延期里程碑 → 实际线超过截止日期
+- [ ] 不足 5 项关联任务 → 标注数据点稀疏警告
+
+---
+
+## pmo-changelog
+
+### Happy Path
+- [ ] `claude pmo-changelog` — 生成本周变更日志
+- [ ] `claude pmo-changelog --since 2026-06-01` — 指定起始日期
+- [ ] `claude pmo-changelog --dry-run` — 预览不归档
+- [ ] 变更日志包含：新增待办、完成待办、里程碑状态变更
+- [ ] 草稿预览提供 4 选项交互：[保存] [编辑] [放弃] [归档]
+
+### Edge Cases
+- [ ] 本周无变更 → 提示无变更，不生成空文档
+- [ ] 同一待办多次状态变更 → 展示完整变更链路
+- [ ] 负责人字段为空 → 标注「未分配」
+- [ ] 里程碑跨多个周期 → 每个周期均有进展记录
+- [ ] `--since` 指定日期晚于今天 → 提示日期无效
+
+---
+
+## pmo-retro
+
+### Happy Path
+- [ ] `claude pmo-retro` — 生成复盘报告
+- [ ] `claude pmo-retro --since 2026-06-01` — 指定复盘区间
+- [ ] `claude pmo-retro --dry-run` — 预览不归档
+- [ ] 复盘包含：完成情况、延期分析、团队效率、改进建议
+- [ ] 草稿预览提供 5 选项交互：[保存] [编辑标题] [调整内容] [放弃] [归档]
+
+### Edge Cases
+- [ ] 复盘区间无数据 → 提示无足够数据生成复盘
+- [ ] 全部待办完成 → 标注 100% 完成率
+- [ ] 全部待办延期 → 重点分析延期原因
+- [ ] 无会议记录文档 → 跳过会议相关分析
+- [ ] `--since` 超过 90 天 → 警告区间过长，建议缩小范围
+
+---
+
+## pmo-health
+
+### Happy Path
+- [ ] `claude pmo-health` — 当前项目完整健康检查
+- [ ] `claude pmo-health --all` — 所有关注项目诊断
+- [ ] 检查①：配置完整性（schemaVersion、必填字段）
+- [ ] 检查②：Base 连通性（三张表可读）
+- [ ] 检查③：Wiki 连通性（知识空间可访问）
+- [ ] 检查④：待处理队列积压统计
+- [ ] 检查⑤：配置版本检查
+- [ ] 输出类 brew doctor 格式报告（✅/⚠️/❌）
+
+### Edge Cases
+- [ ] 配置不完整 → ❌ 标注缺少字段
+- [ ] Base 不可达 → ❌ baseAppToken 无效
+- [ ] Wiki 不可达 → ⚠️ 提示检查权限
+- [ ] 所有队列为空 → ✅ 无需处理
+- [ ] 队列有过期文件（>30天）→ ⚠️ 建议清理
+- [ ] `--all` 模式下部分项目不可达 → 标注该状态，不影响其他
+
+---
+
+## pmo-standup
+
+### Happy Path
+- [ ] `claude pmo-standup` — 生成个人站会速报
+- [ ] `claude pmo-standup --send` — 生成并推送到群
+- [ ] 包含昨日完成项（从 Base 状态变更推断）
+- [ ] 包含今日计划项（待处理 + 今日截止）
+- [ ] 包含阻塞项（已过期 + 无进展）
+- [ ] 输出格式为可直接分享的文本
+
+### Edge Cases
+- [ ] 无昨日完成项 → 显示「无」
+- [ ] 今日无计划 → 显示「待规划」
+- [ ] 无阻塞项 → 显示「无阻塞 ✅」
+- [ ] 周末执行 → 提示「今日为周末，是否仍生成站会报告？」
+- [ ] 任务超过 10 项 → 截断并标注「...共 {N} 项」
+- [ ] IM 推送失败 → 终端预览仍正常展示
+
+---
+
+## pmo-weekly-digest
+
+### Happy Path
+- [ ] `claude pmo-weekly-digest` — 终端预览轻量周报
+- [ ] `claude pmo-weekly-digest --send` — 推送消息卡片到群
+- [ ] 包含本周完成数 / 新增数 / 过期数
+- [ ] 输出为消息卡片格式（非完整文档）
+
+### Edge Cases
+- [ ] 本周无数据 → 提示「本周暂无活动数据」
+- [ ] 新项目（历史数据少）→ 标注数据积累中
+- [ ] 零完成率 → 如实展示，建议关注
+- [ ] 新增数超过完成数 → ⚠️ 积压趋势警告
+- [ ] IM 推送失败 → 终端预览仍正常展示，提示重试
+
+---
+
 ## 集成测试场景
 
 - [ ] 完整流程：pmo-init → pmo-use → pmo-info → 检查数据一致性
@@ -410,3 +523,9 @@
 - [ ] 多项目切换：pmo-use A → pmo-list → pmo-use B → pmo-info → 数据隔离正确
 - [ ] 断点恢复：pmo-meeting-process 模拟失败 → pending_backfill 写入 → 下次 pmo-info 自动重试
 - [ ] 队列过期：手动将 pending_backfill 文件 failed_at 改为 31 天前 → 任一 pmo-* 执行时提示清理
+- [ ] 燃尽图闭环：pmo-burn-down --all-milestones → 选择里程碑 → 验证数据与待办/里程碑关联一致
+- [ ] 变更日志闭环：多次 pmo-todo-followup --complete → pmo-changelog --since → 变更条目匹配
+- [ ] 复盘闭环：多周期操作后 → pmo-retro --since 30d → 完成率/延期率与 Base 统计一致
+- [ ] 健康诊断：模拟 Base/Wiki 不可达 → pmo-health 输出 ❌ → 修复后恢复 ✅
+- [ ] 站会推送闭环：pmo-standup --send → 群消息收到正确格式 → 内容与 Base 数据一致
+- [ ] 轻量周报：pmo-weekly-digest --send → 消息卡片正确渲染 → 数据与 pmo-stats 统计一致

@@ -1,6 +1,6 @@
 ---
 name: pmo-todo-followup
-version: 1.2.0
+version: 1.6.0
 description: "待办事项跟进：查看、筛选、标记完成、修改负责人/截止日期。支持 --mine/--overdue/--status/--all/--complete/--modify 参数。--all 模式下支持 --project 指定目标项目，无需切换上下文。"
 metadata:
   requires:
@@ -53,7 +53,37 @@ claude pmo-todo-followup --all --modify TODO-003 --due 2026-06-20 --project XRay
 
 已通过 `pmo-use` 设置当前项目。
 
-**所有 Base 写操作遵循公共错误重试策略（见 CLAUDE.md）：3 次指数退避重试（1s/3s/5s）。**
+## 公共模式引用
+
+### 配置加载
+
+按 CLAUDE.md「读取当前项目配置」规则加载项目配置：
+
+1. 优先读取环境变量 `$SMART_PMO_CURRENT`
+2. 若无环境变量，读取文件 `~/.smart-pmo/current`
+3. 用 project_id 加载 `~/.smart-pmo/registry/{project_id}.json`
+4. 文件不存在或为空 → 提示「请先执行 pmo-use <项目名>」，中断执行
+5. 检查 `schemaVersion`，执行必要的版本迁移
+6. 执行配置完整性校验
+
+### 配置完整性校验
+
+1. 必填字段检查：`project.name`、`larkResources.baseAppToken`、`larkResources.baseTableIds.todos` 不为空
+2. 若任一必填字段缺失 → 提示「配置不完整，缺少: {字段列表}。建议重新运行 pmo-init 修复」
+
+### 错误重试策略
+
+所有 Base 写操作遵循公共错误重试策略（见 CLAUDE.md）：3 次指数退避重试（1s/3s/5s）。
+
+### 待处理队列检查
+
+> 📋 详见 [`_shared/pending-queue-check.md`](../_shared/pending-queue-check.md)。执行开始时检查 `~/.smart-pmo/` 下的四个待处理目录，特别关注：
+> - `.pending_assignee/` — 其他 Skill 写入失败的负责人分配，提示用户手动处理
+> - `.pending_backfill/` — 会议索引回填失败的待办，自动重试关联
+
+### 日期计算
+
+> 📅 详见 [`_shared/date-calc-rules.md`](../_shared/date-calc-rules.md)。模糊时间表达（如「尽快」「下周X」）按共享模块规则计算。
 
 ## 执行流程
 
