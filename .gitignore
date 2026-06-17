@@ -15,5 +15,9 @@ Thumbs.db
 # Review reports
 REVIEW-*.md
 
+# ASR correction tables (generated/local files)
+asr.md
+*.asr.md
+
 # User data
 output/
