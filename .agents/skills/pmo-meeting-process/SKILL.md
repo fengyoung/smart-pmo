@@ -1,7 +1,7 @@
 ---
 name: pmo-meeting-process
-version: 1.6.2
-description: "处理会议录音/转写，自动提取纪要、关键决策和待办事项。支持飞书妙记和外部转写文件两种输入源。新增：--no-confirm 跳过交互确认、--local 生成本地 .md 文件（用于批量/离线场景）。"
+version: 1.7.0
+description: "处理会议录音/转写，自动提取纪要、关键决策、待办事项和里程碑。支持飞书妙记和外部转写文件两种输入源。新增：--no-confirm 跳过交互确认、--local 生成本地 .md 文件（用于批量/离线场景）。"
 metadata:
   requires:
     bins: []
@@ -136,6 +136,12 @@ config = get_current_project_config()
 - 从对话中识别决策点
 - 记录决策内容
 
+**里程碑：**
+- 从对话中识别阶段性的时间节点或交付目标
+- 提取内容：里程碑名称、计划日期（或月份范围）、负责人
+- 仅提取明确的里程碑节点，非待办类目标
+- 未识别到 → 跳过
+
 **待办事项（重点）：**
 从转写内容中通过语义模式识别待办：
 
@@ -206,6 +212,9 @@ config = get_current_project_config()
 • {决策1}
 • {决策2}
 
+── 里程碑 ──
+◇ [M1] {名称} | 计划: {日期} | @{负责人}
+
 ── 待办事项 ──
 □ [1] {内容} | @{负责人} | 截止: {日期}
 □ [2] {内容} | @{负责人} | 截止: ⚠️ 待确认（未识别到截止时间）
@@ -246,11 +255,11 @@ config = get_current_project_config()
 写入顺序严格按以下步骤执行，以确保双向关联的完整性：
 
 **模式适配：**
-- `--todos-only`：只执行②③④，跳过①
-- `--doc-only`：只执行①，跳过②③④
+- `--todos-only`：执行②③③'④，跳过①（里程碑随待办一同写入）
+- `--doc-only`：只执行①，跳过②③③'④
 - `--index-only`：只执行② + 更新已有待办的"所属会议"字段 + 回填④
-- `选择写入`：仅处理用户选中的待办，其余步骤照常
-- `--sub-project <项目名>`：在①的纪要文档中标注"提取自 {主项目} 周会，本文档为 {sub-project} 子专题"，②③使用 sub-project 的 Base 配置
+- `选择写入`：仅处理用户选中的待办，里程碑③'仍执行
+- `--sub-project <项目名>`：在①的纪要文档中标注"提取自 {主项目} 周会，本文档为 {sub-project} 子专题"，②③③'使用 sub-project 的 Base 配置
 
 **`--sub-project` 边界情况处理：**
 
@@ -292,6 +301,15 @@ config = get_current_project_config()
 
 → 收集所有写入成功的待办 record_id 列表（`todo_record_ids`）
 
+**③' 写入 Base 里程碑表：**
+通过 `lark-base` 将提取到的里程碑写入项目里程碑表：
+- 里程碑名称、计划日期、负责人、状态=未开始
+- 来源="会议:{会议主题}"
+- 去重检查：按里程碑名称+计划日期匹配，存在则跳过
+- 失败 → 记录到 `~/.smart-pmo/.pending_milestone/{project_id}.json`，不影响主线流程
+
+→ 收集写入成功的里程碑 record_id 列表（`milestone_record_ids`）
+
 **去重检查（P2-6）：**
 写入前通过 `lark-base` 查询同来源+相似内容的已有待办（按待办内容关键词匹配）：
 - 若发现候选重复项 → 在终端展示：
@@ -313,11 +331,12 @@ config = get_current_project_config()
 
 | 失败点 | 处理方式 |
 |--------|---------|
-| ①文档归档失败 | 跳过①，继续写②③，doc_url 留空，提示用户手动归档 |
+| ①文档归档失败 | 跳过①，继续写②③③'，doc_url 留空，提示用户手动归档 |
 | ②会议索引写入失败 | 提示"会议索引未写入，待办将写入但无会议关联"，待办的所属会议字段留空 |
 | ②成功但③全部失败 | **孤立会议记录**：将 meeting_record_id + 原始待办内容保存到 `~/.smart-pmo/.pending_orphan_meeting/{project_id}.json`，提示用户执行 `--index-only` 补录 |
-| ③待办写入失败（部分） | 记录失败项，继续写成功的；④仍使用成功写入的 record_id |
+| ③待办写入失败（部分） | 记录失败项，继续写成功的；③'④仍使用成功写入的 record_id |
 | ③待办负责人字段写入失败 | 自动降级：将负责人姓名写入备注字段，记录到 `.pending_assignee/` |
+| **③'里程碑写入失败** | 记录失败详情到 `~/.smart-pmo/.pending_milestone/{project_id}.json`，不影响待办和纪要流程，下次 `pmo-milestone` 执行时提示补录 |
 | ④回填产出待办失败 | 记录到 `.pending_backfill/`，提示"会议索引的产出待办关联未完成"；见 CLAUDE.md 人工介入出口 |
 
 ## 异常处理
@@ -330,6 +349,8 @@ config = get_current_project_config()
 | 文件格式不支持 | 提示支持的格式 |
 | 文件 >10MB | 建议拆分 |
 | 未提取到待办 | 提示并询问是否仍写入纪要 |
+| 提取到里程碑但无待办 | 里程碑仍写入 Base，纪要正常归档 |
+| 里程碑写入失败 | 记录到 `~/.smart-pmo/.pending_milestone/{project_id}.json`，不影响主线流程 |
 | Base 写入失败 | 纪要继续归档，待办暂存到 `~/.smart-pmo/.pending_backfill/{project_id}.json` |
 | 负责人写入失败 | 自动降级写备注字段，记录到 `.pending_assignee/`（P1-5） |
 | 全部Base查询失败 | 回退到仅生成纪要模式，提示用户稍后手动补录 |
@@ -347,6 +368,7 @@ config = get_current_project_config()
   "participants": ["张三", "李四"],
   "discussion_points": [...],
   "decisions": [...],
+  "milestones": [...],
   "todos": [...],
   "cached_at": "2026-06-11T15:30:00"
 }
