@@ -1,7 +1,7 @@
 # Smart-PMO 项目手册
 
 > 基于 Claude Code + 飞书 CLI 的项目管理工具集
-> 项目版本：见根目录 `VERSION` 文件（当前 v1.6.2）
+> 项目版本：见根目录 `VERSION` 文件（当前 v1.7.0）
 
 ---
 
@@ -38,7 +38,7 @@ smart-pmo/
 ├── .agents/                             # Claude Code Skill 定义
 │   └── skills/
 │       ├── _shared/                      # 公共模块（日期计算、待处理队列检查、卡片模板等）
-│       ├── pmo-*/                        # 各 Skill 目录
+│       ├── pmo-cross-process/             # 跨项目会议处理（一次提取多项目分发）
 │       └── ...
 
 ├── designs/                            # 架构级设计文档
@@ -349,4 +349,4 @@ baseUrl = https://bytedance.larkoffice.com/base/{config.larkResources.baseAppTok
 | **阶段五（P3，v1.6.0）** | pmo-burn-down + pmo-changelog + pmo-retro 完整实现；新增 pmo-health + pmo-standup + pmo-weekly-digest | ✅ 已完成 |
 | **v1.6.1 优化** | 全面审查与优化（P0-P2）：补齐交互确认、消除内联重复、统一共享模块引用、补全重试策略、收紧权限、版本号对齐、模板增强、新增验证脚本 | ✅ 已完成 |
 | **v1.6.2 优化** | 新增飞书卡片消息模板共享模块（feishu-card-template），支持 interactive 类型通知，含 Python 构造器、色谱对照、Skill 引用规范 | ✅ 已完成 |
-| **阶段六（P4规划）** | 待定 | 📋 规划中 |
+| **v1.7.0（P4）** | pmo-cross-process（跨项目会议处理：一次 AI 提取多项目分发） | ✅ 已完成 |

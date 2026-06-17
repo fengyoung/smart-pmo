@@ -27,6 +27,7 @@ Smart-PMO 是一套基于 **Claude Code Skill 系统 + 飞书 CLI** 的项目管
 │                                                              │
 │  pmo-init            → 初始化项目+创建Base+知识库+注册         │
 │  pmo-meeting-process → 读取妙记/文件 → 提取纪要→归档→写Base   │
+│  pmo-cross-process   → 多项目转写 → 一次提取 → 多项目分发       │
 │  pmo-todo-from-chat  → lark-im 读群消息 → 提取待办 → 写Base  │
 │  pmo-todo-followup   → 查Base → 待办跟进                      │
 │  pmo-archive         → 上传文件到知识库                        │
@@ -394,6 +395,7 @@ Smart-PMO 是一套基于 **Claude Code Skill 系统 + 飞书 CLI** 的项目管
 | `pmo-health` | 项目健康诊断 | P3 | `claude pmo-health` |
 | `pmo-standup` | 每日站会报告 | P3 | `claude pmo-standup` |
 | `pmo-weekly-digest` | 轻量周报推送 | P3 | `claude pmo-weekly-digest` |
+| `pmo-cross-process` | 跨项目会议处理：一次提取多项目分发 | P4 | `claude pmo-cross-process --file <path> --projects A,B,C` |
 
 ---
 
@@ -408,7 +410,7 @@ Smart-PMO 是一套基于 **Claude Code Skill 系统 + 飞书 CLI** 的项目管
 | **v1.5.1 优化** | 全面审查与优化（P0-P3）：消除三重重复、统一共享模块引用、补齐公共模式引用、修复 depends_on、文档/测试同步 | 维护性优化 | ✅ 已完成 |
 | **阶段五（P3，v1.6.0）** | pmo-burn-down + pmo-changelog + pmo-retro + pmo-health + pmo-standup + pmo-weekly-digest 完整实现 | 燃尽图 + 变更日志 + 回顾 + 健康诊断 + 站会 + 轻量周报 | ✅ 已完成 |
 | **v1.6.1 优化** | 全面审查与优化（P0-P2）：补齐交互确认、消除内联重复、统一共享模块引用、补全重试策略、收紧权限、版本号对齐、模板增强、新增验证脚本 | 维护性优化 | ✅ 已完成 |
-| **阶段六（P4 规划）** | 待定 | 待定 | 📋 规划中 |
+| **阶段六（P4，v1.7.0）** | pmo-cross-process（跨项目会议处理：一次 AI 提取多项目分发） | 跨项目会议纪要+待办分发 | ✅ 已完成 |
 
 ---
 
