@@ -1,7 +1,7 @@
 # Smart-PMO 项目手册
 
 > 基于 Claude Code + 飞书 CLI 的项目管理工具集
-> 项目版本：见根目录 `VERSION` 文件（当前 v1.7.1）
+> 项目版本：见根目录 `VERSION` 文件（当前 v1.8.0）
 
 ---
 
@@ -350,3 +350,5 @@ baseUrl = https://bytedance.larkoffice.com/base/{config.larkResources.baseAppTok
 | **v1.6.1 优化** | 全面审查与优化（P0-P2）：补齐交互确认、消除内联重复、统一共享模块引用、补全重试策略、收紧权限、版本号对齐、模板增强、新增验证脚本 | ✅ 已完成 |
 | **v1.6.2 优化** | 新增飞书卡片消息模板共享模块（feishu-card-template），支持 interactive 类型通知，含 Python 构造器、色谱对照、Skill 引用规范 | ✅ 已完成 |
 | **v1.7.0（P4）** | pmo-cross-process（跨项目会议处理：一次 AI 提取多项目分发） | ✅ 已完成 |
+| **v1.7.1 优化** | pmo-meeting-process 新增里程碑提取，pmo-cross-process 提取深度对齐 | ✅ 已完成 |
+| **v1.8.0 重构** | pmo-archive 重构：新增飞书链接输入、AI 内容理解自动分类、格式转换；从手动目录指定升级为全自动智能归档 | ✅ 已完成 |

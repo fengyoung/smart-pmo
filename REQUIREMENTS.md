@@ -1,6 +1,6 @@
 # Smart-PMO 项目需求清单
 
-> 最后更新：2026-06-16
+> 最后更新：2026-06-18
 
 ---
 
@@ -377,7 +377,7 @@ Smart-PMO 是一套基于 **Claude Code Skill 系统 + 飞书 CLI** 的项目管
 | `pmo-meeting-process` | 会议处理 | P0 | `claude pmo-meeting-process --minutes <url>` |
 | `pmo-todo-from-chat` | 群消息提取待办 | P0 | `claude pmo-todo-from-chat` |
 | `pmo-todo-followup` | 待办跟进 | P0 | `claude pmo-todo-followup` |
-| `pmo-archive` | 文档归档 | P0 | `claude pmo-archive --file <path> --dir <dir>` |
+| `pmo-archive` | 文档智能归档（本地/飞书链接→AI分类→自动归档） | P0 | `claude pmo-archive --file <path>` / `--url <飞书链接>` |
 | `pmo-milestone` | 里程碑管理 | P1 | `claude pmo-milestone --check` |
 | `pmo-weekly-report` | 周报生成 | P1 | `claude pmo-weekly-report` |
 | `pmo-search` | 跨表跨项目搜索 | P2 | `claude pmo-search <关键词>` |
@@ -411,6 +411,8 @@ Smart-PMO 是一套基于 **Claude Code Skill 系统 + 飞书 CLI** 的项目管
 | **阶段五（P3，v1.6.0）** | pmo-burn-down + pmo-changelog + pmo-retro + pmo-health + pmo-standup + pmo-weekly-digest 完整实现 | 燃尽图 + 变更日志 + 回顾 + 健康诊断 + 站会 + 轻量周报 | ✅ 已完成 |
 | **v1.6.1 优化** | 全面审查与优化（P0-P2）：补齐交互确认、消除内联重复、统一共享模块引用、补全重试策略、收紧权限、版本号对齐、模板增强、新增验证脚本 | 维护性优化 | ✅ 已完成 |
 | **阶段六（P4，v1.7.0）** | pmo-cross-process（跨项目会议处理：一次 AI 提取多项目分发） | 跨项目会议纪要+待办分发 | ✅ 已完成 |
+| **v1.7.1 优化** | pmo-meeting-process 新增里程碑提取，pmo-cross-process 提取深度对齐 | 里程碑提取增强 | ✅ 已完成 |
+| **v1.8.0 重构** | pmo-archive 重构：新增飞书链接输入、AI 内容理解自动分类、格式转换；从手动目录指定升级为全自动智能归档 | AI 驱动的文档智能归档 | ✅ 已完成 |
 
 ---
 
