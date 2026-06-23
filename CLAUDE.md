@@ -375,4 +375,4 @@ baseUrl = https://bytedance.larkoffice.com/base/{config.larkResources.baseAppTok
 | **v1.6.2 优化** | 新增飞书卡片消息模板共享模块（feishu-card-template），支持 interactive 类型通知，含 Python 构造器、色谱对照、Skill 引用规范 | ✅ 已完成 |
 | **v1.7.0（P4）** | pmo-cross-process（跨项目会议处理：一次 AI 提取多项目分发） | ✅ 已完成 |
 | **v1.7.1 优化** | pmo-meeting-process 新增里程碑提取，pmo-cross-process 提取深度对齐 | ✅ 已完成 |
-| **v1.8.0 重构** | pmo-archive 重构：新增飞书链接输入、AI 内容理解自动分类、格式转换；从手动目录指定升级为全自动智能归档 | ✅ 已完成 |
+| **v1.8.0 重构** | pmo-archive 重构（AI 智能分类归档）+ pmo-cross-process 提质升级（提取深度量化、动态项目检测、ASR 校正反馈闭环） | ✅ 已完成 |
