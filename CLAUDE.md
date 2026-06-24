@@ -1,7 +1,7 @@
 # Smart-PMO 项目手册
 
 > 基于 Claude Code + 飞书 CLI 的项目管理工具集
-> 项目版本：见根目录 `VERSION` 文件（当前 v1.8.0）
+> 项目版本：见根目录 `VERSION` 文件（当前 v1.9.0）
 
 ---
 
@@ -376,3 +376,4 @@ baseUrl = https://bytedance.larkoffice.com/base/{config.larkResources.baseAppTok
 | **v1.7.0（P4）** | pmo-cross-process（跨项目会议处理：一次 AI 提取多项目分发） | ✅ 已完成 |
 | **v1.7.1 优化** | pmo-meeting-process 新增里程碑提取，pmo-cross-process 提取深度对齐 | ✅ 已完成 |
 | **v1.8.0 重构** | pmo-archive 重构（AI 智能分类归档）+ pmo-cross-process 提质升级（提取深度量化、动态项目检测、ASR 校正反馈闭环） | ✅ 已完成 |
+| **v1.9.0 重构** | pmo-cross-process Step 5 全流程重写：直接在知识库内创建文档、批量写入 Base、同源检查防重复、负责人单用户限制、新增回滚模式和群通知模板、ASR 术语校正反馈扩展 | ✅ 已完成 |
