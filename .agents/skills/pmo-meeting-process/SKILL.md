@@ -92,10 +92,11 @@ config = get_current_project_config()
 
 **执行 AI 提取前，先加载以下辅助上下文以提升准确性：**
 
-**① ASR 校正表加载：**
-- 非 `--local` 模式：通过 `lark-wiki` 检查项目知识库 `05-项目资料/ASR校正表.md` 是否存在
-- `--local` 模式：检查是否指定 `--asr-correction <文件>` 参数，若指定 → 读取本地校正表文件；未指定 → 跳过
-- 若存在 → 读取内容作为 LLM prompt 的校正上下文
+**① ASR 校正表加载（v1.9.0 改为本地资源）：**
+- 优先：`--asr-correction <文件>` → 读取指定本地文件
+- 否则：读取 `~/.smart-pmo/asr-correction.json`
+  - 文件存在 → 加载全部 entries，生成 Markdown 表格用于 LLM prompt
+  - 文件不存在 → 首次自动创建空结构
 - 若不存在/未指定 → 跳过，不影响主线流程
 
 **② 历史会议参考加载：**
@@ -111,7 +112,7 @@ config = get_current_project_config()
 
 **处理规则：**
 - 以上三步均为非阻塞增强，任一加载失败不影响主线流程
-- 加载成功时在终端输出：`📖 已加载 ASR校正表（{N}条）、历史会议参考（{N}条）、成员映射（{N}人）`
+- 加载成功时在终端输出：`📖 已加载 ASR校正表（~/.smart-pmo/asr-correction.json，{N}条）、历史会议参考（{N}条）、成员映射（{N}人）`
 - 加载的内容注入到 LLM prompt 的「背景上下文」段（详见 Prompt 模板 `references/meeting-prompt-template.md`）
 
 ### 第3步：AI 提取结构化信息
