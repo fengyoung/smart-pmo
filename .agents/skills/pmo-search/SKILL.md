@@ -7,8 +7,6 @@ metadata:
     bins: []
   depends_on:
     - lark-base
-    - lark-doc
-    - lark-wiki
 ---
 
 # pmo-search — 跨表搜索

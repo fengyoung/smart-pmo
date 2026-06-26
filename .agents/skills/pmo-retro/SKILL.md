@@ -46,14 +46,7 @@ claude pmo-retro --project XRay
 
 ### 公共：待处理队列检查
 
-执行前先检查以下目录（按 CLAUDE.md 公共约定），详见 [`_shared/pending-queue-check.md`](../_shared/pending-queue-check.md)：
-
-| 目录 | 用途 | 处理方式 |
-|------|------|------|
-| `~/.smart-pmo/.pending_backfill/` | 会议索引回填失败 | 自动重试回填，成功删文件 |
-| `~/.smart-pmo/.pending_orphan_meeting/` | 孤立会议记录 | 提示用户执行 `--index-only` 补录 |
-| `~/.smart-pmo/.pending_assignee/` | 负责人 API 写入失败 | 提示用户存在待分配记录 |
-| `~/.smart-pmo/.draft/` | 用户取消的解析草稿 | 提示用户存在缓存草稿 |
+> 📋 详见 [`_shared/pending-queue-check.md`](../_shared/pending-queue-check.md)。
 
 ### 配置加载
 

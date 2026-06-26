@@ -45,6 +45,7 @@ claude pmo-meeting-prep --topic "Sprint 评审 + 风险盘点"
 - 🔄 Wiki/IM 写操作失败遵循公共错误重试策略（1s/3s/5s 退避）
 - 🔍 配置加载时执行 schemaVersion 检查和配置完整性校验（见 CLAUDE.md）
 - 📅 日期计算规则详见 [`_shared/date-calc-rules.md`](../_shared/date-calc-rules.md)
+> 📋 卡片消息构造详见 [`_shared/feishu-card-template.md`](../_shared/feishu-card-template.md)
 
 ## 执行流程
 

@@ -1,6 +1,6 @@
 ---
 name: pmo-meeting-process
-version: 1.7.0
+version: 1.9.0
 description: "处理会议录音/转写，自动提取纪要、关键决策、待办事项和里程碑。支持飞书妙记和外部转写文件两种输入源。新增：--no-confirm 跳过交互确认、--local 生成本地 .md 文件（用于批量/离线场景）。"
 metadata:
   requires:
@@ -153,7 +153,7 @@ config = get_current_project_config()
 | "YY要在DDL前完成" | "周五前要完成方案评审" | 截止日期=本周五 |
 | "交给XX" | "这个交给王五处理" | 负责人=王五 |
 
-> 📅 截止时间计算规则详见 [`_shared/date-calc-rules.md`](_shared/date-calc-rules.md)：
+> 📅 截止时间计算规则详见 [`../_shared/date-calc-rules.md`](../_shared/date-calc-rules.md)：
 > - "尽快" / "ASAP" → currentDate + 3天
 > - "今天" → currentDate、"明天" → currentDate + 1天
 > - "这周五" → 本周五（若今天已是周五则为下周五）
@@ -405,4 +405,4 @@ claude pmo-meeting-process --index-only "<会议主题>" "<会议日期>"
 
 ### 断点续传与待处理队列
 
-> 📋 详见 [`_shared/pending-queue-check.md`](../_shared/pending-queue-check.md)。检查 `.pending_backfill/`、`.pending_orphan_meeting/`、`.pending_assignee/`、`.draft/` 四个目录。过期清理规则和操作引导见共享模块。
+> 📋 待处理队列检查详见 [`_shared/pending-queue-check.md`](../_shared/pending-queue-check.md)。

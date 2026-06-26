@@ -47,6 +47,8 @@ claude pmo-weekly-report --send --chat-id <chat_id>
 ### 公共：待处理队列检查
 
 > 📋 详见 [`_shared/pending-queue-check.md`](../_shared/pending-queue-check.md)。执行开始时检查 `~/.smart-pmo/` 下的四个待处理目录。
+>
+> 📋 卡片消息构造（`--send` 模式）详见 [`_shared/feishu-card-template.md`](../_shared/feishu-card-template.md)。
 
 ### 配置加载
 

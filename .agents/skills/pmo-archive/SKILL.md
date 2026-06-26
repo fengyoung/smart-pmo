@@ -65,7 +65,7 @@ claude pmo-archive --url <链接1> --url <链接2> --url <链接3>
 
 ### 配置完整性校验
 
-1. 必填字段检查：`project.name`、`larkResources.baseAppToken`、`larkResources.wikiSpaceId`、`larkResources.wikiNodeTokens` 不为空
+1. 必填字段检查：`project.name`、`larkResources.baseAppToken`、`larkResources.baseTableIds.todos`、`larkResources.baseTableIds.milestones`、`larkResources.baseTableIds.meetingIndex`、`larkResources.wikiSpaceId`、`larkResources.wikiNodeTokens` 不为空
 2. 若任一必填字段缺失 → 提示「配置不完整，缺少: {字段列表}。建议重新运行 pmo-init 修复」
 
 ### 错误重试策略

@@ -7,6 +7,7 @@ metadata:
     bins: []
   depends_on:
     - lark-base
+    - lark-im
 ---
 
 # pmo-risk-scan — 项目风险扫描
@@ -98,6 +99,8 @@ claude pmo-risk-scan --send
 ```
 
 ### --send 推送模式
+
+> 📋 卡片消息构造详见 [`_shared/feishu-card-template.md`](../_shared/feishu-card-template.md)。
 
 1. 按项目分别生成风险卡片
 2. 推送到各项目配置 `larkResources.chatIds` 的第一个群（仅对有风险的项目推送）

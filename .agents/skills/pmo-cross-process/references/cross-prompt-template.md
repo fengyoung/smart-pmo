@@ -103,7 +103,7 @@
    - 内容: 具体可执行的任务描述
    - 负责人: 从成员映射表中匹配的注册姓名（非转写原文中的别名/昵称）
    - 截止日期: YYYY-MM-DD 格式
-     > 📅 日期计算规则（引用自 _shared/date-calc-rules.md）：
+     > 📅 日期计算规则（以下为 LLM 用快照，规范定义见 [`_shared/date-calc-rules.md`](../_shared/date-calc-rules.md)）：
      > - "尽快" / "ASAP" → {currentDate} + 3 天
      > - "今天" → {currentDate}
      > - "明天" → {currentDate} + 1 天
@@ -112,7 +112,7 @@
      > - "月底" → 当月最后一天
      > - 未提及截止时间 → 留空
    - 优先级: P0-紧急 / P1-重要 / P2-一般 / P3-低优
-     > 优先级推断规则：
+     > 优先级推断规则（以下为 LLM 用快照，规范定义见 [`_shared/date-calc-rules.md`](../_shared/date-calc-rules.md)）：
      > - 含"紧急""今天/明天必须""影响上线/交付" → P0-紧急
      > - 含"重要""本周内""涉及多团队" → P1-重要
      > - 常规任务 → P2-一般

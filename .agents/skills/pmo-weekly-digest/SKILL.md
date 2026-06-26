@@ -57,6 +57,8 @@ claude pmo-weekly-digest --week YYYY-MM-DD
 
 执行前检查待处理队列（仅简短提示，不阻塞主流程），详见 [`_shared/pending-queue-check.md`](../_shared/pending-queue-check.md)。
 
+> 📋 卡片消息构造详见 [`_shared/feishu-card-template.md`](../_shared/feishu-card-template.md)。
+
 ### 配置加载
 
 1. 按 CLAUDE.md「读取当前项目配置」规则加载项目配置

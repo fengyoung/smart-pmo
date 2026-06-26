@@ -60,7 +60,7 @@ claude pmo-standup --team
 
 **确定 "当前用户"：**
 1. 若指定 `--member <姓名>` → 按成员名称解析规则（见 CLAUDE.md）找到 openId
-2. 若无 `--member` → 通过 `lark-contact` 获取当前登录用户的 openId（`get_me`）
+2. 若无 `--member` → 通过 `lark-contact` 获取当前登录用户的 openId（`lark-cli contact +me`）
 3. 若 openId 无法确定 → 提示「无法获取当前用户信息，请使用 --member <姓名> 指定」
 
 **`--team` 模式：** 遍历 `config.team.members`，逐人生成速报（串行执行，最终合并展示）。
@@ -141,6 +141,8 @@ claude pmo-standup --team
 ```
 
 ### 第4步：推送（--send 时）
+
+> 📋 卡片消息构造详见 [`_shared/feishu-card-template.md`](../_shared/feishu-card-template.md)。
 
 1. 在终端展示速报预览
 2. 确认或直接推送（`--send` 不再询问确认，直接推送）：
