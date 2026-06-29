@@ -1,7 +1,7 @@
 # Smart-PMO 项目手册
 
 > 基于 Claude Code + 飞书 CLI 的项目管理工具集
-> 项目版本：见根目录 `VERSION` 文件（当前 v1.9.1）
+> 项目版本：见根目录 `VERSION` 文件（当前 v1.9.2）
 
 ---
 
@@ -378,3 +378,4 @@ baseUrl = https://bytedance.larkoffice.com/base/{config.larkResources.baseAppTok
 | **v1.8.0 重构** | pmo-archive 重构（AI 智能分类归档）+ pmo-cross-process 提质升级（提取深度量化、动态项目检测、ASR 校正反馈闭环） | ✅ 已完成 |
 | **v1.9.0 重构** | pmo-cross-process Step 5 全流程重写：直接在知识库内创建文档、批量写入 Base、同源检查防重复、负责人单用户限制、新增回滚模式和群通知模板、ASR 术语校正反馈扩展 | ✅ 已完成 |
 | **v1.9.1 优化** | 全面审查与优化（P0-P2）：修复用户字段格式错误（防止 1254066）、统一 feishu-card-template 引用（8 个 Skill）、修复 depends_on 声明（3 处）、消除内联重复内容（3 个 Skill）、修复共享模块引用路径（2 处）、补全配置校验、验证脚本新增 7 项自动检查 | ✅ 已完成 |
+| **v1.9.2 优化** | 规范优化：清理 9 个临时文件、修复 4 个 Skill 硬编码目录名（改为从 config.larkResources.wikiNodeTokens 动态读取）、12 个 Skill 版本号按 git diff 实证对齐至 v1.6.3 | ✅ 已完成 |
