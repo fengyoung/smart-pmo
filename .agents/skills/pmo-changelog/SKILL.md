@@ -1,6 +1,6 @@
 ---
 name: pmo-changelog
-version: 1.6.2
+version: 1.6.3
 description: "变更日志：汇总指定周期内已完成待办和里程碑为自然语言 Changelog，适合对外发布或团队同步。支持按周/月/里程碑范围生成，可导出 Markdown 或归档到知识库。"
 metadata:
   requires:
@@ -173,7 +173,7 @@ claude pmo-changelog --send
 
 **归档到知识库（选「确认归档」时）：**
 1. 通过 `lark-doc` 创建飞书文档
-2. 通过 `lark-wiki` 归档到 `05-项目资料/`
+2. 通过 `lark-wiki` 归档到 `config.larkResources.wikiNodeTokens["05-项目资料"]` 对应的目录节点
    - 文档标题格式：`{YYYYMMDD}-Changelog-{周期标识}`（如 `20260615-Changelog-第25周`）
    - 命名冲突时追加序号：`-2`、`-3`
 

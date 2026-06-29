@@ -1,6 +1,6 @@
 ---
 name: pmo-meeting-prep
-version: 1.6.2
+version: 1.6.3
 description: "会前准备：自动拉取上次会议未完成待办、临近到期里程碑、长期无进展待办，生成议程文档并可选推送到项目群。帮助会议主持人高效准备。"
 metadata:
   requires:
@@ -104,7 +104,7 @@ claude pmo-meeting-prep --topic "Sprint 评审 + 风险盘点"
 ### 第4步：归档与推送
 
 1. 通过 `lark-doc` 创建飞书文档
-2. 归档到知识库 `01-会议纪要/`（文件名：`{YYYYMMDD}-{会议主题}-议程`）
+2. 归档到 `config.larkResources.wikiNodeTokens["01-会议纪要"]` 对应的目录节点（文件名：`{YYYYMMDD}-{会议主题}-议程`）
 3. 若指定 `--send`：推送议程卡片到项目群
 4. **追溯性**：将议程文档链接写入 Base「会议记录索引」表中（若已有对应会议记录则更新「纪要文档链接」字段；若无则创建一条新记录，会议主题后加"（议程）"标注，状态与正式会议纪要区分）
 

@@ -1,6 +1,6 @@
 ---
 name: pmo-retro
-version: 1.6.2
+version: 1.6.3
 description: "项目复盘：基于会议纪要文档和待办数据，AI 辅助生成复盘报告（做得好的 / 待改进的 / 行动计划），可选将行动计划写入 Base 待办，并归档到知识库。"
 metadata:
   requires:
@@ -86,7 +86,7 @@ claude pmo-retro --project XRay
 对确定的时间范围，**并行**查询：
 
 **① 会议纪要文档（通过 lark-wiki + lark-doc）：**
-- 通过 `lark-wiki` 列出知识库 `01-会议纪要/` 目录下的文档节点
+- 通过 `lark-wiki` 列出 `config.larkResources.wikiNodeTokens["01-会议纪要"]` 对应目录下的文档节点
 - 按文档名过滤出日期在范围内的文档（格式：`YYYYMMDD-*`）
 - 通过 `lark-doc` 逐个读取文档正文（最多读取 10 篇，优先最新）
 - 提取内容：关键决策段落、讨论要点摘要
@@ -205,7 +205,7 @@ claude pmo-retro --project XRay
 ```
 
 2. 通过 `lark-doc` 创建飞书文档
-3. 通过 `lark-wiki` 归档到 `05-项目资料/`
+3. 通过 `lark-wiki` 归档到 `config.larkResources.wikiNodeTokens["05-项目资料"]` 对应的目录节点
    - 文档标题格式：`{YYYYMMDD}-复盘-{里程碑名称或"近{N}天"}`
    - 命名冲突时追加序号
 

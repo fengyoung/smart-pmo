@@ -1,6 +1,6 @@
 ---
 name: pmo-risk-scan
-version: 1.6.2
+version: 1.6.3
 description: "项目风险扫描：自动检测所有关注项目的风险信号（过期待办占比、会议断层、里程碑延期、待办长期无更新），输出风险等级和详细告警。"
 metadata:
   requires:

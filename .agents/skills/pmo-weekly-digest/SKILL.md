@@ -1,6 +1,6 @@
 ---
 name: pmo-weekly-digest
-version: 1.6.2
+version: 1.6.3
 description: "轻量周报推送：将本周项目进展以消息卡片形式推送到群，不创建文档，适合轻量同步。与 pmo-weekly-report 互补：report 生成完整归档文档，digest 快速推一条卡片。"
 metadata:
   requires:

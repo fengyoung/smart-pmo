@@ -1,6 +1,6 @@
 ---
 name: pmo-weekly-report
-version: 1.6.2
+version: 1.6.3
 description: "自动生成项目周报。从 Base 统计本周会议、待办完成率、里程碑进展，生成格式化周报文档并归档到知识库。支持与上周数据对比，展示趋势变化。支持 --send 推送周报摘要到项目群。"
 metadata:
   requires:
@@ -68,7 +68,7 @@ claude pmo-weekly-report --send --chat-id <chat_id>
 
 在拉取数据前，先检查是否已生成过本周周报：
 
-1. 通过 `lark-wiki` 查询知识库 `02-周报/` 目录下的文档列表
+1. 通过 `lark-wiki` 查询 `config.larkResources.wikiNodeTokens["02-周报"]` 对应目录下的文档列表
 2. 匹配文件名模式 `{YYYYMMDD}-*`，查找是否存在日期在本周范围内的文档
 3. 若存在匹配文档：
    ```
@@ -189,7 +189,7 @@ claude pmo-weekly-report --send --chat-id <chat_id>
 用户确认后：
 
 1. **创建飞书文档**：通过 `lark-doc` 创建周报文档
-2. **归档到知识库**：通过 `lark-wiki` 将文档归档到 `02-周报/` 目录
+2. **归档到知识库**：通过 `lark-wiki` 将文档归档到 `config.larkResources.wikiNodeTokens["02-周报"]` 对应的目录节点
    - 文档标题格式 `{YYYYMMDD}-{标题}`（如 `20260612-第24周周报`）
    - 遵循知识库文档命名格式约定
 3. **推送摘要**（若指定 `--send`）：

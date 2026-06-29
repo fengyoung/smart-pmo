@@ -1,6 +1,6 @@
 ---
 name: pmo-standup
-version: 1.6.2
+version: 1.6.3
 description: "每日站会速报：生成个人视角的站会速报（昨日完成 / 今日计划 / 阻塞项），输出可直接分享到群的简洁文本。支持 --send 推送到项目群。"
 metadata:
   requires:
