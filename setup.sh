@@ -4,8 +4,9 @@
 
 set -e
 
-SKILLS_DIR="$HOME/.claude/skills"
-PMO_SKILLS_DIR="$(cd "$(dirname "$0")" && pwd)/.agents/skills"
+PROJECT_ROOT="$(cd "$(dirname "$0")" && pwd)"
+SKILLS_DIR="$PROJECT_ROOT/.claude/skills"
+PMO_SKILLS_DIR="$PROJECT_ROOT/.agents/skills"
 REGISTRY_DIR="$HOME/.smart-pmo/registry"
 
 echo "┌─────────────────────────────────────┐"
@@ -87,7 +88,7 @@ touch "$HOME/.smart-pmo/pinned" 2>/dev/null || true
 echo "  ✅ ~/.smart-pmo/ 目录已创建（含待处理队列子目录）"
 
 # 2.5 复制示例配置（如果存在）
-SAMPLE_CONFIG="$(cd "$(dirname "$0")" && pwd)/.smart-pmo-sample"
+SAMPLE_CONFIG="$PROJECT_ROOT/.smart-pmo-sample"
 if [ -d "$SAMPLE_CONFIG" ]; then
     echo "▶ 复制示例项目配置..."
     cp -n "$SAMPLE_CONFIG"/*.json "$REGISTRY_DIR/" 2>/dev/null || true
@@ -101,13 +102,21 @@ mkdir -p "$SKILLS_DIR"
 count=0
 for skill_dir in "$PMO_SKILLS_DIR"/*/; do
     skill_name=$(basename "$skill_dir")
+
+    # 跳过 _shared 公共模块（非技能）
+    [ "$skill_name" = "_shared" ] && continue
+
     target="$SKILLS_DIR/$skill_name"
 
-    if [ -L "$target" ]; then
+    # 清除旧的目录或 symlink
+    if [ -d "$target" ] && [ ! -L "$target" ]; then
+        rm -rf "$target"
+    elif [ -L "$target" ]; then
         rm "$target"
     fi
 
-    ln -sf "$skill_dir" "$target"
+    # 使用相对路径 symlink（从 .claude/skills/ → .agents/skills/）
+    ln -sf "../../.agents/skills/$skill_name/" "$target"
     echo "  ✅ $skill_name"
     ((count++))
 done
